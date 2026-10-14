@@ -223,12 +223,13 @@ export const siteConfig = {
 ### 3.2 Logo 圖片
 
 將新分會的 Logo 放入 `public/images/assets/logo/` 目錄：
-- 正方形 Logo（用於 favicon、社群分享圖）
+- 正方形 Logo（用於 favicon、預設頭像）
 - 橫式 Logo（用於 Navbar、Footer）
+- 社群分享圖放在 `public/images/og/`，尺寸 **1200×630**（`home.jpg`、`bni.jpg`、`members.jpg`、`referrals.jpg`）。不要用正方形 Logo 當 `og:image`，LINE 與 Facebook 會把預覽裁得很醜。
 
 ### 3.3 `seo-routes.js`
 
-修改每個路由的 title / description / keywords，將「長輝」替換為新分會名稱。
+修改每個路由的 title / description / keywords / ogImage / ogImageAlt，將「長輝」替換為新分會名稱。標題控制在約 30 個字以內，描述控制在約 70–110 個字，並與 `index.html` 首頁預設值保持一致。`server.js` 會依這個檔案注入給不執行 JavaScript 的爬蟲與社群預覽。
 
 ### 3.4 `index.html`
 

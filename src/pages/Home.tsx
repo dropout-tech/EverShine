@@ -13,8 +13,6 @@ const Home: React.FC = () => {
     return (
         <div className="overflow-hidden">
             <SEO
-                description="BNI 長輝白金分會是台灣最具影響力的線上商會。全台少數 100% 支援線上與會的 BNI 分會，協助企業主透過結構化線上商務引薦拓展人脈、精準媒合資源，實現業務共贏。加入台北頂尖線上企業家商會。"
-                keywords="商會, 台灣商會, 線上商會, 線上BNI, BNI, BNI台灣, 台北商會, 長輝分會, 商務引薦, 企業家商會, 線上商務社團, 線上會議, 線上人脈, 白金分會, 商務合作, 人脈拓展, 付出者收穫, Givers Gain"
                 structuredData={{
                     '@type': 'WebPage',
                     name: 'BNI 長輝白金分會 — 台灣線上商會首選',
