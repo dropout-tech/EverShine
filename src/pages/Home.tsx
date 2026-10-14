@@ -15,8 +15,8 @@ const Home: React.FC = () => {
             <SEO
                 structuredData={{
                     '@type': 'WebPage',
-                    name: 'BNI 長輝白金分會 — 台灣線上商會首選',
-                    description: 'BNI 長輝白金分會是台灣最具影響力的線上商會，100% 支援線上與會，透過全球最大商務引薦系統協助台灣企業主拓展人脈與業務。',
+                    name: '每週三線上商會｜BNI 長輝白金',
+                    description: '一個產業只留一席，全程線上，來賓免費。每週三 6:30 例會。創會至 2026 年 1 月，累計 2.6 萬張引薦、成交逾 6.29 億。',
                     url: 'https://evershine.tw/',
                     isPartOf: { '@id': 'https://evershine.tw/#website' },
                     about: { '@id': 'https://evershine.tw/#organization' },

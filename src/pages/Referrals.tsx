@@ -30,8 +30,8 @@ const Referrals: React.FC = () => {
             <SEO
                 structuredData={{
                     '@type': 'CollectionPage',
-                    name: 'BNI 長輝白金分會商務引薦成功案例',
-                    description: '台灣 BNI 長輝白金分會商務引薦成功案例與合作實績。',
+                    name: '2.6 萬張引薦｜長輝成交案例',
+                    description: '創會至 2026 年 1 月，長輝白金分會累計 26,459 張引薦單、成交新台幣 6.29 億。',
                     url: 'https://evershine.tw/referrals',
                     isPartOf: { '@id': 'https://evershine.tw/#website' },
                     inLanguage: 'zh-TW'

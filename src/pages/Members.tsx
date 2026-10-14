@@ -102,8 +102,8 @@ const Members: React.FC = () => {
             <SEO
                 structuredData={{
                     '@type': 'CollectionPage',
-                    name: 'BNI 長輝白金分會台灣商會會員名錄',
-                    description: '台灣 BNI 長輝白金分會涵蓋 60+ 個產業的優秀企業家與專業人士。',
+                    name: '一產業一席｜長輝企業家名錄',
+                    description: '工程、行銷、金融、法稅、AI、健康，60 多種產業各只有一位代表。',
                     url: 'https://evershine.tw/members',
                     isPartOf: { '@id': 'https://evershine.tw/#website' },
                     inLanguage: 'zh-TW'

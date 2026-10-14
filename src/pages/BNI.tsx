@@ -28,8 +28,8 @@ const BNIPage: React.FC = () => {
             <SEO
                 structuredData={{
                     '@type': 'WebPage',
-                    name: '認識 BNI — 全球最大商會暨商務引薦組織',
-                    description: 'BNI 是全球最大的商會，在台灣擁有 245 個分會和近萬名會員。',
+                    name: '什麼是 BNI｜76 國的引薦商會',
+                    description: 'BNI 要會員每週見面、互相引薦，一個產業只留一席。遍及 76 國、34 萬會員，台灣有 245 個分會。',
                     url: 'https://evershine.tw/bni',
                     isPartOf: { '@id': 'https://evershine.tw/#website' },
                     inLanguage: 'zh-TW'

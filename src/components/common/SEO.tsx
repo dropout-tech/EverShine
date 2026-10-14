@@ -30,7 +30,7 @@ interface SEOProps {
 }
 
 const SITE_URL = siteConfig.siteUrl;
-const DEFAULT_TITLE = `${siteConfig.branchFullName}｜台灣線上商會・商務引薦`;
+const DEFAULT_TITLE = '每週三線上商會｜BNI 長輝白金';
 const SITE_NAME = `${siteConfig.branchFullName}｜台灣商會`;
 
 const routes = seoRoutes as Record<string, RouteSeo>;
