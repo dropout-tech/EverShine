@@ -188,7 +188,29 @@ function renderAppShell(routePath) {
         html = stripHomeOnlySchema(html);
     }
 
-    return { status, html };
+    return { status, html: injectRuntimeEnv(html) };
+}
+
+const PUBLIC_ENV_KEYS = [
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_ANON_KEY',
+    'VITE_CLAIM_PASSWORD',
+    'VITE_TURNSTILE_SITE_KEY',
+    'VITE_GA_ID',
+    'VITE_FB_PIXEL_ID',
+    'VITE_CLARITY_ID',
+];
+
+function injectRuntimeEnv(html) {
+    const env = {};
+    for (const key of PUBLIC_ENV_KEYS) {
+        const value = process.env[key];
+        if (typeof value === 'string' && value.trim()) env[key] = value.trim();
+    }
+    const payload = JSON.stringify(env).replace(/</g, '\\u003c');
+    const tag = `<script>window.__EVERSHINE_ENV__=${payload}</script>`;
+    if (html.includes('window.__EVERSHINE_ENV__')) return html;
+    return html.replace('<div id="root">', `${tag}\n  <div id="root">`);
 }
 
 function sendHtml(res, status, html) {

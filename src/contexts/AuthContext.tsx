@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 interface AuthContextType {
     user: User | null;
@@ -25,24 +25,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check active sessions and sets the user
+        let active = true;
+        const stopWaiting = () => {
+            if (active) setLoading(false);
+        };
+        // Auth must not hold the whole site behind a blank screen.
+        const timeout = window.setTimeout(stopWaiting, 4000);
+
+        if (!isSupabaseConfigured || !supabase) {
+            stopWaiting();
+            return () => {
+                active = false;
+                window.clearTimeout(timeout);
+            };
+        }
+
         supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!active) return;
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
-        });
+            stopWaiting();
+        }).catch(() => stopWaiting());
 
-        // Listen for changes on auth state (logged in, signed out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!active) return;
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
+            stopWaiting();
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            active = false;
+            window.clearTimeout(timeout);
+            subscription.unsubscribe();
+        };
     }, []);
 
     const signOut = async () => {
+        if (!supabase) return;
         await supabase.auth.signOut();
     };
 

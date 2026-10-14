@@ -16,6 +16,24 @@ RUN rm -f package-lock.json && \
 # This ensures we don't miss any config files like tsconfig.app.json
 COPY . .
 
+# Vite bakes VITE_* into the browser bundle. Zeabur only forwards service
+# env vars into `docker build` when they are declared as ARG. Without these,
+# the client throws on startup and the site renders as a blank page.
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_CLAIM_PASSWORD
+ARG VITE_TURNSTILE_SITE_KEY
+ARG VITE_GA_ID
+ARG VITE_FB_PIXEL_ID
+ARG VITE_CLARITY_ID
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
+    VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
+    VITE_CLAIM_PASSWORD=$VITE_CLAIM_PASSWORD \
+    VITE_TURNSTILE_SITE_KEY=$VITE_TURNSTILE_SITE_KEY \
+    VITE_GA_ID=$VITE_GA_ID \
+    VITE_FB_PIXEL_ID=$VITE_FB_PIXEL_ID \
+    VITE_CLARITY_ID=$VITE_CLARITY_ID
+
 # Build the application
 RUN npm run build
 
