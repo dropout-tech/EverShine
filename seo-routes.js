@@ -1,36 +1,70 @@
 const SITE_URL = 'https://evershine.tw';
 
-const seoRoutes = {
-    '/': {
-        title: 'BNI 長輝白金分會 | 台灣商會首選・線上商務引薦平台 | 台北企業家商會',
-        description: 'BNI 長輝白金分會是台灣最具影響力的線上商會，全台少數 100% 支援線上與會。透過全球最大商務引薦系統，協助台灣企業主精準對接資源。加入台北頂尖線上商會，不受地點限制，拓展人脈與業務。',
-        keywords: '商會, 台灣商會, 台北商會, 線上商會, 線上BNI, BNI, BNI台灣, 長輝分會, 商務引薦, 企業家商會, 商業社團, 線上商務社團, 線上會議, 線上例會, 線上人脈, 台灣商務社團, 台北商務社團, 商會推薦, 企業家人脈, 商務合作平台, BNI長輝, 白金分會, Givers Gain, 付出者收穫',
-        canonical: `${SITE_URL}/`
-    },
-    '/bni': {
-        title: '認識 BNI | 全球最大商會・台灣線上商務引薦系統 | BNI 長輝白金分會',
-        description: 'BNI 是全球最大的商會暨商務引薦組織，遍及 76+ 國家、擁有 34 萬+ 會員。BNI 長輝白金分會 100% 支援線上與會，在台灣擁有 245 個分會、近萬名企業主會員。透過「付出者收穫 Givers Gain」核心價值，協助台灣企業主建立信任的商務合作關係。',
-        keywords: '什麼是BNI, BNI商會, 台灣商會, 全球商會, 線上商會, 線上BNI, 商務引薦系統, 付出者收穫, Givers Gain, 台灣BNI, BNI台灣, 台灣商務社團, 商會組織, 企業家商會, BNI七大核心價值, 線上商務例會',
-        canonical: `${SITE_URL}/bni`
-    },
-    '/members': {
-        title: '台灣線上商會會員 | BNI 長輝白金分會企業家名錄 | BNI 長輝白金分會',
-        description: '探索 BNI 長輝白金分會的優秀企業家與專業人士。我們是台灣頂尖線上商會，全程線上與會，涵蓋居住工程、品牌行銷、金融法稅、AI科技等 60+ 個產業類別，為台灣企業主媒合最專業的合作夥伴。',
-        keywords: '台灣商會會員, BNI會員, 長輝會員, 企業家名錄, 台北商會, 線上商會會員, 商務媒合, 行業專家, 企業合作, 台灣企業家, 商會推薦, 線上人脈',
-        canonical: `${SITE_URL}/members`
-    },
-    '/referrals': {
-        title: '商會引薦成功案例 | BNI 台灣線上商務合作實績 | BNI 長輝白金分會',
-        description: '見證台灣 BNI 長輝白金分會的線上商務引薦實力。透過真實的引薦成功案例，展示台灣頂尖線上商會如何透過專業對接與互利合作，為企業主創造巨大的商業價值與商務合作機會。',
-        keywords: '商會引薦案例, BNI成功案例, 台灣商務合作, 線上商會合作, 商會合作實績, 引薦成功故事, 商務媒合案例, 台灣商會, BNI台灣, 線上引薦',
-        canonical: `${SITE_URL}/referrals`
-    },
-    '/privacy': {
-        title: '隱私權政策與服務條款 | BNI 長輝白金分會',
-        description: 'BNI 長輝白金分會隱私權政策與服務條款。了解我們如何保護您的個人資訊和使用條件。',
-        keywords: '隱私權政策, 服務條款, BNI長輝, 個資保護',
-        canonical: `${SITE_URL}/privacy`
-    }
+/** Social cards (LINE / Facebook / Slack) expect 1.91:1, 1200×630. */
+const OG = {
+    width: 1200,
+    height: 630,
+    type: 'image/jpeg',
 };
 
+const seoRoutes = {
+    '/': {
+        title: '每週三線上商會｜BNI 長輝白金',
+        description: '一個產業只留一席，全程線上，來賓免費。每週三 6:30 例會，會員互相引薦。創會至 2026 年 1 月，累計 2.6 萬張引薦、成交逾 6.29 億。先來坐一場。',
+        keywords: '線上商會, 台灣商會, BNI, BNI長輝, 長輝白金分會, 商務引薦, 來賓免費, 台北商會, 每週三例會, 一產業一席',
+        canonical: `${SITE_URL}/`,
+        ogImage: `${SITE_URL}/images/og/home.jpg`,
+        ogImageAlt: 'BNI 長輝白金分會：來賓免費，每週三早上全程線上，一個產業只留一席',
+    },
+    '/bni': {
+        title: '什麼是 BNI｜76 國的引薦商會',
+        description: 'BNI 要會員每週見面、互相引薦，一個產業只留一席。遍及 76 國、34 萬會員，台灣有 245 個分會。長輝每週三全程線上，來賓免費。',
+        keywords: '什麼是BNI, BNI商會, 商務引薦, 付出者收穫, Givers Gain, 台灣商會, 線上商會, BNI台灣',
+        canonical: `${SITE_URL}/bni`,
+        ogImage: `${SITE_URL}/images/og/bni.jpg`,
+        ogImageAlt: '什麼是 BNI：會員每週互相引薦，遍及 76 國、34 萬會員',
+        breadcrumbs: [
+            { name: '首頁', path: '/' },
+            { name: '認識 BNI', path: '/bni' },
+        ],
+    },
+    '/members': {
+        title: '一產業一席｜長輝企業家名錄',
+        description: '工程、行銷、金融、法稅、AI、健康，60 多種產業各只有一位代表。先看長輝白金分會的會員，再來當來賓。',
+        keywords: '商會會員, BNI會員, 企業家名錄, 一產業一席, 長輝白金分會, 商務媒合, 台灣企業家',
+        canonical: `${SITE_URL}/members`,
+        ogImage: `${SITE_URL}/images/og/members.jpg`,
+        ogImageAlt: 'BNI 長輝白金分會會員名錄：一個產業只留一席',
+        breadcrumbs: [
+            { name: '首頁', path: '/' },
+            { name: '會員介紹', path: '/members' },
+        ],
+    },
+    '/referrals': {
+        title: '2.6 萬張引薦｜長輝成交案例',
+        description: '看長輝會員怎麼把引薦做成合作。創會至 2026 年 1 月，累計 26,459 張引薦單、成交新台幣 6.29 億。先看案例，再來當來賓。',
+        keywords: '引薦案例, BNI引薦, 商務合作, 長輝白金分會, 引薦成交, 台灣商會',
+        canonical: `${SITE_URL}/referrals`,
+        ogImage: `${SITE_URL}/images/og/referrals.jpg`,
+        ogImageAlt: 'BNI 長輝白金分會引薦案例：至 2026 年 1 月累計 26,459 張引薦、成交 6.29 億',
+        breadcrumbs: [
+            { name: '首頁', path: '/' },
+            { name: '引薦案例', path: '/referrals' },
+        ],
+    },
+    '/privacy': {
+        title: '隱私權政策｜BNI 長輝白金分會',
+        description: 'BNI 長輝白金分會隱私權政策與服務條款，說明本網站如何蒐集、使用與保護您的個人資料，以及使用本站服務時應遵守的約定。',
+        keywords: '隱私權政策, 服務條款, BNI長輝, 個資保護',
+        canonical: `${SITE_URL}/privacy`,
+        ogImage: `${SITE_URL}/images/og/home.jpg`,
+        ogImageAlt: 'BNI 長輝白金分會：來賓免費，每週三早上全程線上，一個產業只留一席',
+        breadcrumbs: [
+            { name: '首頁', path: '/' },
+            { name: '隱私權政策', path: '/privacy' },
+        ],
+    },
+};
+
+export { OG, SITE_URL };
 export default seoRoutes;

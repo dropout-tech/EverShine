@@ -47,6 +47,9 @@ export const siteConfig = {
         bni: '/images/assets/logo/bni-logo-new.png',
     },
 
+    /** 1200×630 social share card. Do not use the square logo as og:image. */
+    ogImage: '/images/og/home.jpg',
+
     defaultPhoto: '/images/assets/logo/白色正方形logo.png',
 
     /** Claim 密碼應從環境變數讀取，fallback 僅供開發環境 */

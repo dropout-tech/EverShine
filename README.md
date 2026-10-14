@@ -69,6 +69,14 @@ VITE_TURNSTILE_SITE_KEY=機器人防護_KEY
 
 ---
 
+## 搜尋與分享預覽
+
+社群預覽（LINE、Facebook、Slack）讀的是伺服器回傳的 HTML，不會執行頁面上的 JavaScript。
+
+- 分享圖在 `public/images/og/`，尺寸 1200×630。正方形 Logo 只用於 favicon，不用來當 `og:image`。
+- 各頁標題、描述與分享圖集中在 `seo-routes.js`。`server.js` 依網址注入；前端 `SEO` 元件在換頁時同步同一份資料。
+- 首頁的 FAQ 與每週例會結構化資料只出現在首頁。例會日期會在回應時改成下一個週三。
+
 ## 📚 開發文件
 
 ### 核心文件

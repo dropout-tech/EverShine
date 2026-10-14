@@ -28,14 +28,10 @@ const Referrals: React.FC = () => {
     return (
         <div className="min-h-screen relative overflow-hidden">
             <SEO
-                title="商會引薦成功案例 | BNI 台灣商務合作實績"
-                description="見證台灣 BNI 長輝白金分會的商務引薦實力。透過真實的引薦成功案例，展示台灣頂尖商會如何透過專業對接與互利合作，為企業主創造巨大的商業價值與商務合作機會。"
-                keywords="商會引薦案例, BNI成功案例, 台灣商務合作, 商會合作實績, 引薦成功故事, 商務媒合案例, 台灣商會, BNI台灣"
-                breadcrumbs={[{ name: '引薦案例', path: '/referrals' }]}
                 structuredData={{
                     '@type': 'CollectionPage',
-                    name: 'BNI 長輝白金分會商務引薦成功案例',
-                    description: '台灣 BNI 長輝白金分會商務引薦成功案例與合作實績。',
+                    name: '2.6 萬張引薦｜長輝成交案例',
+                    description: '創會至 2026 年 1 月，長輝白金分會累計 26,459 張引薦單、成交新台幣 6.29 億。',
                     url: 'https://evershine.tw/referrals',
                     isPartOf: { '@id': 'https://evershine.tw/#website' },
                     inLanguage: 'zh-TW'

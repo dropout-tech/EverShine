@@ -4,26 +4,7 @@ Disallow: /login
 Disallow: /admin
 Disallow: /member-edit
 
-# Allow AI search bots for citation
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: anthropic-ai
-Allow: /
-
-User-agent: Bingbot
-Allow: /
+# AI 搜尋爬蟲沿用上方規則。
+# 不要再為 GPTBot 等機器人另開只有 Allow: / 的群組，否則會蓋掉私人路徑的 Disallow。
 
 Sitemap: https://evershine.tw/sitemap.xml
