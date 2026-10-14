@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../../lib/supabase';
 import { initAnalytics, trackPageView } from '../../lib/analytics';
 
 const PageTracker = () => {
@@ -23,6 +23,7 @@ const PageTracker = () => {
 
             // 2. Internal Supabase Page Views
             try {
+                if (!isSupabaseConfigured || !supabase) return;
                 await supabase.from('page_views').insert({
                     path: location.pathname,
                     user_agent: navigator.userAgent,

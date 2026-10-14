@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
 // Simplified type for what we need in UI
 export interface MemberInfo {
@@ -20,6 +20,24 @@ export interface Referral {
     referee: MemberInfo;
 }
 
+function withPhoto(person: MemberInfo): MemberInfo {
+    const photo = person.photo || '';
+    const normalized = !photo || photo.startsWith('http') || photo.startsWith('/') ? photo : `/${photo}`;
+    return { ...person, photo: normalized };
+}
+
+async function loadStaticReferrals(): Promise<Referral[]> {
+    const response = await fetch('/data/referrals.json');
+    if (!response.ok) throw new Error('static referrals missing');
+    const payload = await response.json();
+    const rows = Array.isArray(payload.referrals) ? payload.referrals : [];
+    return rows.map((row: Referral) => ({
+        ...row,
+        referrer: withPhoto(row.referrer),
+        referee: withPhoto(row.referee),
+    }));
+}
+
 export const useReferrals = () => {
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,6 +47,10 @@ export const useReferrals = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
+                if (!isSupabaseConfigured || !supabase) {
+                    setReferrals(await loadStaticReferrals());
+                    return;
+                }
                 // 1. Get raw referrals data with resilient ordering
                 let { data: refsData, error: refsError } = await supabase
                     .from('referrals')
@@ -102,12 +124,10 @@ export const useReferrals = () => {
                 setReferrals(formattedReferrals);
             } catch (err: any) {
                 console.error("Error loading referrals:", err);
-                // If it's a 404 or 400, just show empty instead of error
-                if (err.code === 'PGRST116' || err.code === '42P01' || err.code === 'PGRST204') {
+                try {
+                    setReferrals(await loadStaticReferrals());
+                } catch {
                     setReferrals([]);
-                } else {
-                    setReferrals([]); // Still return empty to prevent crash
-                    // setError(err.message || '無法載入引薦資料'); // Don't block UI with error if we can help it
                 }
             } finally {
                 setLoading(false);

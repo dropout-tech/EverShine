@@ -1,5 +1,5 @@
 
-import { supabase } from './supabase';
+import { isSupabaseConfigured, supabase } from './supabase';
 
 // Define the shape of our analytics configuration
 interface AnalyticsConfig {
@@ -51,6 +51,7 @@ export const trackEvent = async (eventName: string, details: any = {}) => {
 
     // 2. Send to Supabase (Internal High-Value Tracking)
     try {
+        if (!isSupabaseConfigured || !supabase) return;
         await supabase.from('analytics_events').insert({
             event_name: eventName,
             event_data: details,

@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
 
     useEffect(() => {
         const checkAdmin = async () => {
-            if (!user) {
+            if (!user || !supabase) {
                 setIsAdmin(false);
                 return;
             }
