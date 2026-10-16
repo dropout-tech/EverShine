@@ -14,7 +14,15 @@ export default defineConfig({
       output: {
         entryFileNames: `assets/[name]-[hash].js`,
         chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/[name]-[hash].[ext]`
+        assetFileNames: `assets/[name]-[hash].[ext]`,
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('chart.js') || id.includes('react-chartjs-2')) return 'charts';
+          if (id.includes('browser-image-compression')) return 'image-tools';
+          if (id.includes('@supabase')) return 'supabase';
+          if (id.includes('framer-motion')) return 'motion';
+          if (id.includes('react-dom') || id.includes('react-router') || id.includes('/react/')) return 'react';
+        }
       }
     }
   }

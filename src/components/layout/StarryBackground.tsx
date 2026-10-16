@@ -10,7 +10,7 @@ const StarryBackground: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let animationFrameId: number;
+        let animationFrameId = 0;
         let particles: Particle[] = [];
 
         const resize = () => {
@@ -61,52 +61,67 @@ const StarryBackground: React.FC = () => {
             }
         }
 
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         const initParticles = () => {
             particles = [];
-            // Responsive particle count
-            const numberOfParticles = Math.min(window.innerWidth * 0.15, 150);
+            const numberOfParticles = reducedMotion ? 24 : Math.min(40, Math.floor(window.innerWidth / 40));
             for (let i = 0; i < numberOfParticles; i++) {
                 particles.push(new Particle());
             }
         };
 
-        const animate = () => {
+        const drawFrame = () => {
             if (!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw particles
             particles.forEach(p => {
-                p.update();
+                if (!reducedMotion) p.update();
                 p.draw();
             });
 
-            // Connections
-            particles.forEach((a, index) => {
-                particles.slice(index + 1).forEach(b => {
-                    const dx = a.x - b.x;
-                    const dy = a.y - b.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < 100) {
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - distance / 100) * 0.15})`;
+            if (!reducedMotion) {
+                const maxDistanceSq = 110 * 110;
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const a = particles[i];
+                        const b = particles[j];
+                        const dx = a.x - b.x;
+                        const dy = a.y - b.y;
+                        const distanceSq = dx * dx + dy * dy;
+                        if (distanceSq >= maxDistanceSq) continue;
+                        const distance = Math.sqrt(distanceSq);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - distance / 110) * 0.15})`;
                         ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(a.x, a.y);
                         ctx.lineTo(b.x, b.y);
                         ctx.stroke();
                     }
-                });
-            });
+                }
+            }
+        };
 
+        const animate = () => {
+            drawFrame();
+            if (document.hidden || reducedMotion) return;
             animationFrameId = requestAnimationFrame(animate);
         };
 
+        const onVisibility = () => {
+            if (document.hidden || reducedMotion) return;
+            cancelAnimationFrame(animationFrameId);
+            animate();
+        };
+
         window.addEventListener('resize', resize);
+        document.addEventListener('visibilitychange', onVisibility);
         resize();
         animate();
 
         return () => {
             window.removeEventListener('resize', resize);
+            document.removeEventListener('visibilitychange', onVisibility);
             cancelAnimationFrame(animationFrameId);
         };
     }, []);

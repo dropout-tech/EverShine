@@ -75,6 +75,12 @@ VITE_TURNSTILE_SITE_KEY=機器人防護_KEY
 
 現在有兩層保護：建置參數會進映像，執行中的 `server.js` 也會把同一組公開變數注入頁面。就算建置當下沒帶上，只要 Zeabur 服務有設定，首頁、會員與引薦仍會顯示。
 
+## 載入速度
+
+首頁不要一次拉完整張會員照片。列表、跑馬燈與聯絡人用的是 `public/images/members/thumbs/` 裡的 256px WebP，點開或縮圖失敗才回到原圖。英雄區背景是 `public/images/assets/background.webp`。
+
+圖檔用 `scripts/optimize-images.py` 重產（需要 Pillow）。會員編輯、管理後台和圖表不會跟首頁包在同一個 JavaScript 檔。
+
 ## 搜尋與分享預覽
 
 社群預覽（LINE、Facebook、Slack）讀的是伺服器回傳的 HTML，不會執行頁面上的 JavaScript。

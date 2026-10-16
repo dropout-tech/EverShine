@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Quote } from 'lucide-react';
 import PageHero from '../components/common/PageHero';
 import SEO from '../components/common/SEO';
+import { memberPhotoFallback, memberPhotoSrc } from '../lib/memberPhoto';
 
 const Referrals: React.FC = () => {
     const { referrals, loading, error } = useReferrals();
@@ -134,10 +135,14 @@ const Referrals: React.FC = () => {
                                                 <div className="flex items-center gap-4 w-[45%]">
                                                     <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 shrink-0">
                                                         <img
-                                                            src={referral.referrer.photo || '/images/assets/logo/白色正方形logo.png'}
+                                                            src={memberPhotoSrc(referral.referrer.photo, 'thumb')}
                                                             alt={referral.referrer.name}
+                                                            width={48}
+                                                            height={48}
+                                                            loading="lazy"
+                                                            decoding="async"
                                                             className="w-full h-full object-cover object-[center_top]"
-                                                            onError={(e) => e.currentTarget.src = '/images/assets/logo/白色正方形logo.png'}
+                                                            onError={(e) => { e.currentTarget.src = memberPhotoFallback(e.currentTarget.src, referral.referrer.photo); }}
                                                         />
                                                     </div>
                                                     <div className="overflow-hidden">
@@ -162,10 +167,14 @@ const Referrals: React.FC = () => {
                                                     </div>
                                                     <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 shrink-0">
                                                         <img
-                                                            src={referral.referee.photo || '/images/assets/logo/白色正方形logo.png'}
+                                                            src={memberPhotoSrc(referral.referee.photo, 'thumb')}
                                                             alt={referral.referee.name}
+                                                            width={48}
+                                                            height={48}
+                                                            loading="lazy"
+                                                            decoding="async"
                                                             className="w-full h-full object-cover object-[center_top]"
-                                                            onError={(e) => e.currentTarget.src = '/images/assets/logo/白色正方形logo.png'}
+                                                            onError={(e) => { e.currentTarget.src = memberPhotoFallback(e.currentTarget.src, referral.referee.photo); }}
                                                         />
                                                     </div>
                                                 </div>
