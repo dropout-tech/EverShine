@@ -15,13 +15,10 @@ const PageHero: React.FC<PageHeroProps> = ({ title, subtitle, showScrollIndicato
             <div
                 className="absolute inset-0 z-0"
                 style={{
-                    backgroundImage: 'url(/images/assets/background.png)',
+                    backgroundImage: 'url(/images/assets/background.webp)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center center',
                     backgroundRepeat: 'no-repeat',
-                    backgroundAttachment: 'fixed',
-                    willChange: 'transform',
-                    imageRendering: '-webkit-optimize-contrast',
                     mixBlendMode: 'screen',
                     maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
