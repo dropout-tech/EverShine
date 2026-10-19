@@ -34,8 +34,9 @@ ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_FB_PIXEL_ID=$VITE_FB_PIXEL_ID \
     VITE_CLARITY_ID=$VITE_CLARITY_ID
 
-# Build the application
-RUN npm run build
+# Build the application. server.js renders every route from the raw Vite
+# template, so skip the Cloudflare prerender step (`npm run build`) here.
+RUN npm run build:zeabur
 
 # Verify build output
 RUN ls -la dist/ && \
@@ -57,7 +58,7 @@ RUN npm install --production
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
-COPY server.js seo-routes.js ./
+COPY server.js seo-routes.js seo-render.js ./
 
 # Verify files exist
 RUN ls -la dist/ && \
