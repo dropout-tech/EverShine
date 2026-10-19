@@ -83,6 +83,23 @@ VITE_TURNSTILE_SITE_KEY=機器人防護_KEY
 - 各頁標題、描述與分享圖集中在 `seo-routes.js`。`server.js` 依網址注入；前端 `SEO` 元件在換頁時同步同一份資料。
 - 首頁的 FAQ 與每週例會結構化資料只出現在首頁。例會日期會在回應時改成下一個週三。
 
+## 部署到 Cloudflare Pages
+
+Pages 只放靜態檔，加一支處理 `/` 的 Function。`server.js` 的頁首改寫邏輯抽到 `seo-render.js`，Zeabur 與 Pages 共用。
+
+| 設定 | 值 |
+|---|---|
+| Build command | `npm run build`（`vite build` 後跑 `scripts/prerender-routes.mjs`） |
+| Build output directory | `dist` |
+| 環境變數 `NODE_VERSION` | `22`（Vite 7 需要 Node 20.19+ 或 22.12+） |
+| 建置環境變數 | `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_CLAIM_PASSWORD`、`VITE_TURNSTILE_SITE_KEY`、`VITE_GA_ID`、`VITE_FB_PIXEL_ID`、`VITE_CLARITY_ID` |
+
+- Pages 沒有執行中的 `server.js`，不會注入 `window.__EVERSHINE_ENV__`。上面這組變數一定要在建置時設定，否則會打包成空值。
+- `npm run build` 會為每個路由產生一個檔案：`dist/index.html`（首頁）、`dist/bni.html` 等 SEO 頁、`dist/login.html` 等不索引頁，以及 `dist/404.html`。Pages 以 `/bni` 提供 `bni.html`，未知路徑回 404。
+- `functions/index.js` 只處理 `/`，每次回應時把例會日期改成下一個週三。
+- 快取與 `X-Robots-Tag` 寫在 `public/_headers`。
+- Zeabur 用 `npm run build:zeabur`（只跑 `vite build`）：`server.js` 依每次請求改寫原始樣板，不能讀已預先產生的首頁。
+
 ## 📚 開發文件
 
 ### 核心文件

@@ -9,7 +9,7 @@ npm install
 
 # Build the app
 echo "🏗️ Building React app..."
-npm run build
+npm run build:zeabur
 
 # Verify build
 echo "✅ Verifying build output..."
