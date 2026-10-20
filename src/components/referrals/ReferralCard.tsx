@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import type { Referral } from '../../types';
 import { ArrowRight, Quote } from 'lucide-react';
+import { memberPhotoFallback, memberPhotoSrc } from '../../lib/memberPhoto';
 
 const PersonAvatar: React.FC<{ name: string, photo: string, industry: string, isReferee?: boolean }> = ({ name, photo, industry, isReferee }) => {
-    const [imgSrc, setImgSrc] = useState(photo);
+    const [imgSrc, setImgSrc] = useState(() => memberPhotoSrc(photo, 'thumb'));
 
     return (
         <div className="flex flex-col items-center text-center">
@@ -12,7 +13,11 @@ const PersonAvatar: React.FC<{ name: string, photo: string, industry: string, is
                     src={imgSrc}
                     alt={name}
                     className="w-full h-full rounded-full object-cover bg-[#06203a]"
-                    onError={() => setImgSrc('/images/assets/logo/白色正方形logo.png')}
+                    width={56}
+                    height={56}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setImgSrc(memberPhotoFallback(imgSrc, photo))}
                 />
             </div>
             <div className="text-sm font-bold text-white truncate max-w-[80px]">{name}</div>

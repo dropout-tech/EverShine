@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/layout/Navbar';
@@ -10,15 +10,16 @@ import ScrollToTop from './components/common/ScrollToTop';
 import PageTracker from './components/common/PageTracker';
 import BottomNav from './components/layout/BottomNav';
 import Home from './pages/Home';
-import Members from './pages/Members';
-import Referrals from './pages/Referrals';
-import MemberEdit from './pages/MemberEdit';
-import BNI from './pages/BNI';
-import Login from './pages/Login';
-import Privacy from './pages/Privacy';
-import Admin from './pages/Admin';
-import NotFound from './pages/NotFound';
 import { AuthProvider } from './contexts/AuthContext';
+
+const Members = lazy(() => import('./pages/Members'));
+const Referrals = lazy(() => import('./pages/Referrals'));
+const MemberEdit = lazy(() => import('./pages/MemberEdit'));
+const BNI = lazy(() => import('./pages/BNI'));
+const Login = lazy(() => import('./pages/Login'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Admin = lazy(() => import('./pages/Admin'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -44,17 +45,19 @@ const AnimatedRoutes = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Home />} />
-        <Route path="/bni" element={<BNI />} />
-        <Route path="/members" element={<Members />} />
-        <Route path="/referrals" element={<Referrals />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/member-edit" element={<MemberEdit />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Home />} />
+          <Route path="/bni" element={<BNI />} />
+          <Route path="/members" element={<Members />} />
+          <Route path="/referrals" element={<Referrals />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/member-edit" element={<MemberEdit />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </AnimatePresence>
   );
 };

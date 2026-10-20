@@ -4,29 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Building, Briefcase, Phone, Globe, Mail } from 'lucide-react';
 import clsx from 'clsx';
 import { siteConfig } from '../../config/site.config';
+import { memberPhotoFallback, memberPhotoSrc } from '../../lib/memberPhoto';
 
 const MemberCard: React.FC<{ member: Member }> = ({ member }) => {
     const [expanded, setExpanded] = useState(false);
 
-    // Handle both local paths and Supabase URLs
-    const getPhotoUrl = (photo: string) => {
-        if (!photo) return siteConfig.defaultPhoto;
+    const [imgSrc, setImgSrc] = useState(() => memberPhotoSrc(member.photo, 'thumb'));
 
-        const cleanPhoto = photo.trim();
-
-        // If it's already an absolute URL (http:// or https://), return as-is
-        if (cleanPhoto.startsWith('http://') || cleanPhoto.startsWith('https://')) {
-            return cleanPhoto;
-        }
-        // Otherwise, ensure it starts with /
-        return cleanPhoto.startsWith('/') ? cleanPhoto : `/${cleanPhoto}`;
-    };
-
-    const [imgSrc, setImgSrc] = useState(getPhotoUrl(member.photo));
-
-    // Update image when member prop changes
     React.useEffect(() => {
-        setImgSrc(getPhotoUrl(member.photo));
+        setImgSrc(memberPhotoSrc(member.photo, 'thumb'));
     }, [member.photo]);
 
     // Normalize links to array format
@@ -71,10 +57,13 @@ const MemberCard: React.FC<{ member: Member }> = ({ member }) => {
                         <img
                             src={imgSrc}
                             alt={member.name}
+                            width={112}
+                            height={112}
                             loading="lazy"
+                            decoding="async"
                             className="w-full h-full rounded-full object-cover bg-bg-dark"
                             style={{ objectPosition: member.photoPosition || 'center 20%' }}
-                            onError={() => setImgSrc(siteConfig.defaultPhoto)}
+                            onError={() => setImgSrc(memberPhotoFallback(imgSrc, member.photo) || siteConfig.defaultPhoto)}
                         />
                     </div>
 

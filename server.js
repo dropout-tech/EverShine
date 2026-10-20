@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 8080;
 const DIST = path.join(__dirname, 'dist');
 
-console.log('Starting simple node server (v2.0 - SEO Enhanced, release 2026-10-14-r2)...');
+console.log('Starting simple node server (v2.0 - SEO Enhanced, release 2026-10-16-perf)...');
 console.log(`PORT: ${PORT}`);
 console.log(`DIST directory: ${DIST}`);
 

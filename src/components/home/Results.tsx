@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useCountUp } from '../../hooks/useCountUp';
 import { FileText, TrendingUp, Users } from 'lucide-react';
-import ResultsChart from './ResultsChart';
+
+const ResultsChart = lazy(() => import('./ResultsChart'));
+
+const DeferredResultsChart: React.FC = () => {
+    const holderRef = useRef<HTMLDivElement>(null);
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const holder = holderRef.current;
+        if (!holder) return;
+        if (!('IntersectionObserver' in window)) {
+            setVisible(true);
+            return;
+        }
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (!entry.isIntersecting) return;
+                setVisible(true);
+                observer.disconnect();
+            },
+            { rootMargin: '240px' }
+        );
+        observer.observe(holder);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={holderRef} className="min-h-[280px]">
+            {visible && (
+                <Suspense fallback={<div className="h-[280px]" aria-hidden="true" />}>
+                    <ResultsChart />
+                </Suspense>
+            )}
+        </div>
+    );
+};
 
 const MetricCard: React.FC<{ icon: React.ReactNode, value: number, suffix: string, label: string, subtext?: string, isCurrency?: boolean }> = ({ icon, value, suffix, label, subtext, isCurrency }) => {
     const { count, elementRef } = useCountUp(value);
@@ -34,7 +69,7 @@ const Results: React.FC = () => {
                 </div>
 
                 <div className="mb-20">
-                    <ResultsChart />
+                    <DeferredResultsChart />
                 </div>
 
                 {/* Metrics Grid - Vertical Stack on Mobile */}

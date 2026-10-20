@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone } from 'lucide-react';
 import { useMembers } from '../../hooks/useMembers';
+import { memberPhotoFallback, memberPhotoSrc } from '../../lib/memberPhoto';
 
 const Contact: React.FC = () => {
     const { members } = useMembers();
@@ -60,11 +61,19 @@ const Contact: React.FC = () => {
                         >
                             <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-2 border-primary/50 mb-4 group-hover:border-primary transition-colors shrink-0">
                                 <img
-                                    src={item.member?.photo || `/images/members/${item.name}.jpg`}
+                                    src={memberPhotoSrc(item.member?.photo || `/images/members/${item.name}.jpg`, 'thumb')}
                                     alt={item.name}
+                                    width={112}
+                                    height={112}
+                                    loading="lazy"
+                                    decoding="async"
                                     className="w-full h-full object-cover"
                                     style={{ objectPosition: 'top' }}
-                                    onError={(e) => e.currentTarget.src = '/images/assets/logo/白色正方形logo.png'}
+                                    onError={(e) => {
+                                        const next = memberPhotoFallback(e.currentTarget.src, item.member?.photo || `/images/members/${item.name}.jpg`);
+                                        if (e.currentTarget.src.endsWith(next)) return;
+                                        e.currentTarget.src = next;
+                                    }}
                                 />
                             </div>
                             <h3 className="text-lg font-bold text-white mb-1">{item.title}</h3>
