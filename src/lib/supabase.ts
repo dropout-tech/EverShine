@@ -16,11 +16,19 @@ function readRuntimeEnv(): EvershinePublicEnv {
     return runtime && typeof runtime === 'object' ? runtime : {};
 }
 
-/** Build-time Vite values win. Runtime injection covers Docker builds that omitted them. */
+// Public client key for the EverShine project. Build-time and runtime env override it.
+// This is the anon key (RLS still applies). Never put the service role here.
+const PUBLIC_SUPABASE_FALLBACK: Pick<EvershinePublicEnv, 'VITE_SUPABASE_URL' | 'VITE_SUPABASE_ANON_KEY'> = {
+    VITE_SUPABASE_URL: 'https://bapwzqmlvwwmnucjimsn.supabase.co',
+    VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhcHd6cW1sdnd3bW51Y2ppbXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTY3NzgsImV4cCI6MjA4MTQ3Mjc3OH0.lGgudUHGUb14wt-N_fyLSgaML9-DPG4qeHJ5npsRUDQ',
+};
+
+/** Runtime env, then Vite build env, then the public project fallback. */
 export function publicEnv(name: keyof EvershinePublicEnv): string {
     const fromBuild = (import.meta.env as Record<string, string | undefined>)[name];
     const fromRuntime = readRuntimeEnv()[name];
-    return (fromBuild || fromRuntime || '').trim();
+    const fromFallback = PUBLIC_SUPABASE_FALLBACK[name as keyof typeof PUBLIC_SUPABASE_FALLBACK];
+    return (fromRuntime || fromBuild || fromFallback || '').trim();
 }
 
 const supabaseUrl = publicEnv('VITE_SUPABASE_URL');

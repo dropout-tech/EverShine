@@ -104,20 +104,20 @@ export const useReferrals = () => {
                         title: ref.title,
                         description: ref.description,
                         metrics: ref.metrics || { amount: '0', type: 'TWD' },
-                        referrer: {
+                        referrer: withPhoto({
                             name: ref.referrer_name,
                             industry: referrerDetails?.industry || 'Unknown',
                             photo: referrerDetails?.photo || '',
                             story: ref.referrer_story,
                             testimonial: ref.referrer_testimonial
-                        },
-                        referee: {
+                        }),
+                        referee: withPhoto({
                             name: ref.referee_name,
                             industry: refereeDetails?.industry || 'Unknown',
                             photo: refereeDetails?.photo || '',
                             story: ref.referee_story,
                             value: ref.referee_value || ''
-                        }
+                        })
                     };
                 });
 

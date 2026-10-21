@@ -22,11 +22,45 @@ export interface Member {
     email?: string;
 }
 
+const PUBLIC_MEMBER_COLUMNS = [
+    'id', 'name', 'industry', 'photo', 'photoPosition', 'category', 'position',
+    'company', 'shortIntro', 'fullIntro', 'services', 'hashtags', 'links',
+    'editCount', 'updatedAt', 'phone', 'email', 'status',
+].join(',');
+
 function normalizePhoto(photo: string) {
     if (!photo) return '';
     const clean = photo.trim();
     if (clean.startsWith('http') || clean.startsWith('/')) return clean;
     return `/${clean}`;
+}
+
+function toMember(row: Record<string, unknown>, index: number): Member {
+    return {
+        id: Number(row.id ?? index + 1),
+        name: String(row.name || ''),
+        industry: String(row.industry || ''),
+        photo: normalizePhoto(String(row.photo || '')),
+        photoPosition: row.photoPosition ? String(row.photoPosition) : undefined,
+        category: String(row.category || ''),
+        title: String(row.title || row.position || ''),
+        company: String(row.company || ''),
+        shortIntro: String(row.shortIntro || ''),
+        fullIntro: String(row.fullIntro || ''),
+        services: Array.isArray(row.services) ? row.services as string[] : [],
+        hashtags: Array.isArray(row.hashtags) ? row.hashtags as string[] : [],
+        links: (row.links || []) as Member['links'],
+        editCount: typeof row.editCount === 'number' ? row.editCount : undefined,
+        updatedAt: row.updatedAt ? String(row.updatedAt) : undefined,
+        phone: row.phone ? String(row.phone) : undefined,
+        email: row.email ? String(row.email) : undefined,
+    };
+}
+
+function isListedMember(row: { name?: string; status?: string }) {
+    if (!row.name || row.name === '人名' || row.name === '系統管理員') return false;
+    if (row.status && row.status !== 'active') return false;
+    return true;
 }
 
 async function loadStaticMembers(): Promise<Member[]> {
@@ -35,21 +69,8 @@ async function loadStaticMembers(): Promise<Member[]> {
     const payload = await response.json();
     const rows = Array.isArray(payload.members) ? payload.members : [];
     return rows
-        .filter((row: { name?: string }) => row.name && row.name !== '人名')
-        .map((row: Record<string, unknown>, index: number) => ({
-            id: index + 1,
-            name: String(row.name || ''),
-            industry: String(row.industry || ''),
-            photo: normalizePhoto(String(row.photo || '')),
-            category: String(row.category || ''),
-            title: String(row.title || row.position || ''),
-            company: String(row.company || ''),
-            shortIntro: String(row.shortIntro || ''),
-            fullIntro: String(row.fullIntro || ''),
-            services: Array.isArray(row.services) ? row.services as string[] : [],
-            hashtags: Array.isArray(row.hashtags) ? row.hashtags as string[] : [],
-            links: (row.links || []) as Member['links'],
-        }));
+        .filter((row: { name?: string; status?: string }) => isListedMember(row))
+        .map((row: Record<string, unknown>, index: number) => toMember(row, index));
 }
 
 export const useMembers = () => {
@@ -71,11 +92,12 @@ export const useMembers = () => {
 
                 const { data, error } = await supabase
                     .from('members')
-                    .select('*')
+                    .select(PUBLIC_MEMBER_COLUMNS)
                     .order('id', { ascending: true });
 
                 if (error) throw error;
-                setMembers(data || []);
+                const rows = (data || []) as unknown as Record<string, unknown>[];
+                setMembers(rows.filter((row) => isListedMember(row as { name?: string; status?: string })).map(toMember));
                 setError(null);
             } catch (err) {
                 console.error('Error fetching members:', err);

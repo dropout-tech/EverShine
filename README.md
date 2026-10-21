@@ -94,7 +94,9 @@ Pages 只放靜態檔，加一支處理 `/` 的 Function。`server.js` 的頁首
 | 環境變數 `NODE_VERSION` | `22`（Vite 7 需要 Node 20.19+ 或 22.12+） |
 | 建置環境變數 | `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_CLAIM_PASSWORD`、`VITE_TURNSTILE_SITE_KEY`、`VITE_GA_ID`、`VITE_FB_PIXEL_ID`、`VITE_CLARITY_ID` |
 
-- Pages 沒有執行中的 `server.js`，不會注入 `window.__EVERSHINE_ENV__`。上面這組變數一定要在建置時設定，否則會打包成空值。
+- 會員名錄與引薦案例以 Supabase 為準。`public/data/members.json` 與 `public/data/referrals.json` 只在 Supabase 連不上時使用，內容是較舊的名冊。
+- 前端帶著這個專案的公開 anon key。建置環境沒有 `VITE_SUPABASE_*` 時，頁面仍會連到 Supabase。Cloudflare 或 Zeabur 若有設定同名變數，會覆蓋這組公開連線。
+- `functions/_middleware.js` 把 Cloudflare 執行環境裡的公開變數注入每個 HTML，效果與 `server.js` 相同。不要把 service role key 放進這些變數。
 - `npm run build` 會為每個路由產生一個檔案：`dist/index.html`（首頁）、`dist/bni.html` 等 SEO 頁、`dist/login.html` 等不索引頁，以及 `dist/404.html`。Pages 以 `/bni` 提供 `bni.html`，未知路徑回 404。
 - `functions/index.js` 只處理 `/`，每次回應時把例會日期改成下一個週三。
 - 快取與 `X-Robots-Tag` 寫在 `public/_headers`。
