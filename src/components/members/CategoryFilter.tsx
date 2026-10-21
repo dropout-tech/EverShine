@@ -22,7 +22,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ categories, activeCateg
                     whileTap={{ scale: 0.95 }}
                     onClick={() => onSelect(cat)}
                     className={clsx(
-                        "px-5 py-2 rounded-full border transition-all duration-300 backdrop-blur-sm whitespace-nowrap shrink-0",
+                        "rounded-full border transition-all duration-300 backdrop-blur-sm whitespace-nowrap shrink-0",
+                        "px-3.5 py-1.5 text-sm sm:px-5 sm:py-2 sm:text-base",
                         activeCategory === cat
                             ? "bg-primary text-bg-dark border-primary font-bold shadow-[0_0_15px_rgba(76,168,223,0.3)]"
                             : "bg-white/5 text-gray-300 border-white/10 hover:border-primary hover:text-primary"

@@ -1,32 +1,67 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useReferrals } from '../hooks/useReferrals';
-import { motion } from 'framer-motion';
-import { ArrowRight, Quote } from 'lucide-react';
+import { queryKeys } from '../api/queryKeys';
 import PageHero from '../components/common/PageHero';
 import SEO from '../components/common/SEO';
+import { CardSkeleton, ErrorFallback, EmptyState } from '../components/loading';
+import ReferralCard from '../components/referrals/ReferralCard';
+import ReferralFilterBar from '../components/referrals/ReferralFilterBar';
+import {
+    REFERRAL_ALL_CATEGORY,
+    countReferralsByCategory,
+    filterReferrals,
+} from '../lib/referralFilter';
+
+/** 手機單欄、平板兩欄、桌面三欄；items-start 避免展開故事時整列被撐高 */
+const REFERRALS_GRID_CLASS =
+    'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 pb-12 md:pb-16 max-w-7xl mx-auto items-start';
 
 const Referrals: React.FC = () => {
+    const queryClient = useQueryClient();
     const { referrals, loading, error } = useReferrals();
-    const [selectedReferralId, setSelectedReferralId] = React.useState<string | null>(null);
+    const [selectedReferralId, setSelectedReferralId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState(REFERRAL_ALL_CATEGORY);
 
-    if (loading) return (
-        <div className="flex justify-center items-center min-h-[60vh]">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        </div>
+    const categoryCounts = useMemo(() => countReferralsByCategory(referrals), [referrals]);
+
+    const filteredReferrals = useMemo(
+        () => filterReferrals(referrals, { query: searchQuery, category: activeCategory }),
+        [referrals, searchQuery, activeCategory]
     );
 
-    if (error) return <div className="text-center py-20 text-red-400">無法載入引薦資料: {error}</div>;
+    if (loading) {
+        return (
+            <div className="min-h-[70vh] container mx-auto px-4 py-12 pt-24 md:pt-28 max-w-7xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <CardSkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center px-4 py-20">
+                <ErrorFallback
+                    title="無法載入引薦資料"
+                    message={error}
+                    onRetry={() => void queryClient.invalidateQueries({ queryKey: queryKeys.referrals.list })}
+                    className="max-w-md w-full"
+                />
+            </div>
+        );
+    }
 
     const toggleReferral = (id: string) => {
-        if (selectedReferralId === id) {
-            setSelectedReferralId(null);
-        } else {
-            setSelectedReferralId(id);
-        }
+        setSelectedReferralId((current) => (current === id ? null : id));
     };
 
     return (
-        <div className="min-h-screen relative overflow-hidden">
+        <div className="min-h-screen relative overflow-x-hidden">
             <SEO
                 structuredData={{
                     '@type': 'CollectionPage',
@@ -38,6 +73,7 @@ const Referrals: React.FC = () => {
                 }}
             />
             <PageHero
+                compact
                 title="台灣商會引薦案例"
                 subtitle={
                     <>
@@ -46,137 +82,56 @@ const Referrals: React.FC = () => {
                 }
             />
 
-            <div className="container mx-auto px-4 py-12 relative z-10">
+            <div className="relative z-10 bg-bg-primary/98 border-t border-white/5">
+            <div className="container mx-auto px-4 py-8 md:py-10">
 
-                {/* Weekly Feature Note */}
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-8 text-center max-w-2xl mx-auto">
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6 text-center max-w-2xl mx-auto">
                     <p className="text-primary font-bold text-lg mb-1">每週精選案例</p>
                     <p className="text-gray-400 text-sm">
                         實際上門引薦單遠大於此，目前已累積 <span className="text-white font-mono font-bold">16,800+</span> 筆引薦商機，這裡僅展示每週精選的成功故事。
                     </p>
                 </div>
 
-                {/* Referrals Grid - Waterfall/Vertical Stack on Mobile */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-8 md:pb-0 max-w-6xl mx-auto">
-                    {referrals.map((referral, index) => {
-                        const isSelected = selectedReferralId === referral.id;
-                        return (
-                            <div key={referral.id} className="h-full">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                                    onClick={() => toggleReferral(referral.id)}
-                                    className={`bg-bg-dark/60 backdrop-blur-md border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] group flex flex-col cursor-pointer h-full ${isSelected ? 'border-primary ring-1 ring-primary z-20 scale-[1.02]' : 'border-white/10 hover:border-primary/50'
-                                        }`}
-                                >
-                                    <div className="h-2 bg-gradient-to-r from-primary-light via-primary to-primary-dark transition-opacity" />
+                <ReferralFilterBar
+                    query={searchQuery}
+                    onQueryChange={setSearchQuery}
+                    activeCategory={activeCategory}
+                    onCategoryChange={setActiveCategory}
+                    totalCount={referrals.length}
+                    filteredCount={filteredReferrals.length}
+                    categoryCounts={categoryCounts}
+                />
 
-                                    <div className="p-6 md:p-8 flex-grow flex flex-col">
-                                        <h3 className={`text-xl md:text-2xl font-bold mb-4 transition-colors leading-snug ${isSelected ? 'text-primary' : 'text-white group-hover:text-primary'}`}>
-                                            {referral.title}
-                                        </h3>
-
-                                        <div className="flex items-start gap-4 mb-6">
-                                            <Quote className="text-primary/40 shrink-0 transform rotate-180" size={32} />
-                                            <div className="flex-1">
-                                                <p className={`text-gray-300 text-base leading-relaxed ${isSelected ? '' : 'line-clamp-3'}`}>
-                                                    {referral.description}
-                                                </p>
-                                                {isSelected && (
-                                                    <div className="mt-8 space-y-6">
-                                                        {referral.referrer?.story && (
-                                                            <div className="bg-white/5 rounded-2xl p-5 border-l-4 border-primary/50 relative">
-                                                                <div className="absolute -top-3 left-6 px-2 bg-bg-dark text-primary text-[10px] font-bold uppercase tracking-widest">
-                                                                    引薦人真心話
-                                                                </div>
-                                                                <p className="text-gray-300 text-sm leading-relaxed italic">
-                                                                    "{referral.referrer.story}"
-                                                                </p>
-                                                                <div className="mt-2 text-right">
-                                                                    <span className="text-xs text-primary/70">— {referral.referrer.name}</span>
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {referral.referee?.story && (
-                                                            <div className="bg-primary/5 rounded-2xl p-5 border-r-4 border-primary-light/50 relative">
-                                                                <div className="absolute -top-3 right-6 px-2 bg-bg-dark text-primary-light text-[10px] font-bold uppercase tracking-widest">
-                                                                    被引薦人回饋
-                                                                </div>
-                                                                <p className="text-gray-200 text-sm leading-relaxed">
-                                                                    {referral.referee.story}
-                                                                </p>
-                                                                <div className="mt-2 flex items-center gap-2">
-                                                                    <div className="h-px flex-grow bg-white/10"></div>
-                                                                    <span className="text-xs text-primary-light/70">{referral.referee.name} 回應</span>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Metrics Badge */}
-                                        <div className="bg-primary/10 rounded-xl p-6 mb-8 border border-primary/20 mt-auto">
-                                            <div className="text-xs text-primary-light uppercase tracking-wider mb-2 font-bold">成效數據</div>
-                                            <div className="flex justify-between items-end">
-                                                <div className="font-bold text-white text-2xl">{referral.metrics.amount}</div>
-                                                <div className="text-sm text-gray-400 font-medium px-2 py-1 bg-white/5 rounded">{referral.metrics.type}</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Members Connection */}
-                                        <div className="mt-auto border-t border-white/5 pt-6">
-                                            <div className="flex items-center justify-between relative">
-                                                {/* Referrer */}
-                                                <div className="flex items-center gap-4 w-[45%]">
-                                                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 shrink-0">
-                                                        <img
-                                                            src={referral.referrer.photo || '/images/assets/logo/白色正方形logo.png'}
-                                                            alt={referral.referrer.name}
-                                                            className="w-full h-full object-cover object-[center_top]"
-                                                            onError={(e) => e.currentTarget.src = '/images/assets/logo/白色正方形logo.png'}
-                                                        />
-                                                    </div>
-                                                    <div className="overflow-hidden">
-                                                        <div className="text-xs text-gray-500 mb-0.5">引薦人</div>
-                                                        <div className="font-bold text-base truncate text-white">{referral.referrer.name}</div>
-                                                        <div className="text-xs text-gray-400 truncate">{referral.referrer.industry}</div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Arrow */}
-                                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/50 flex flex-col items-center">
-                                                    <span className="text-[10px] text-primary/70 mb-1">引薦給</span>
-                                                    <ArrowRight size={20} />
-                                                </div>
-
-                                                {/* Referee */}
-                                                <div className="flex items-center gap-4 w-[45%] justify-end text-right">
-                                                    <div className="overflow-hidden">
-                                                        <div className="text-xs text-gray-500 mb-0.5">被引薦人</div>
-                                                        <div className="font-bold text-base truncate text-white">{referral.referee.name}</div>
-                                                        <div className="text-xs text-gray-400 truncate">{referral.referee.industry}</div>
-                                                    </div>
-                                                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/20 shrink-0">
-                                                        <img
-                                                            src={referral.referee.photo || '/images/assets/logo/白色正方形logo.png'}
-                                                            alt={referral.referee.name}
-                                                            className="w-full h-full object-cover object-[center_top]"
-                                                            onError={(e) => e.currentTarget.src = '/images/assets/logo/白色正方形logo.png'}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        );
-                    })}
+                <div data-testid="referrals-grid" className={REFERRALS_GRID_CLASS}>
+                    {filteredReferrals.length === 0 && referrals.length > 0 && (
+                        <div className="col-span-full max-w-xl mx-auto">
+                            <EmptyState
+                                title="找不到符合的案例"
+                                description="試試其他關鍵字，或切換分類篩選。"
+                                className="border-white/10 bg-white/[0.03]"
+                            />
+                        </div>
+                    )}
+                    {referrals.length === 0 && (
+                        <div className="col-span-full max-w-xl mx-auto">
+                            <EmptyState
+                                title="尚無引薦案例"
+                                description="目前沒有可顯示的引薦資料。"
+                                className="border-white/10 bg-white/[0.03]"
+                            />
+                        </div>
+                    )}
+                    {filteredReferrals.map((referral, index) => (
+                        <ReferralCard
+                            key={referral.id}
+                            referral={referral}
+                            index={index}
+                            isSelected={selectedReferralId === referral.id}
+                            onToggle={() => toggleReferral(referral.id)}
+                        />
+                    ))}
                 </div>
+            </div>
             </div>
         </div>
     );

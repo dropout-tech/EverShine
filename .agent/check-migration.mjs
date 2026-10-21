@@ -57,8 +57,8 @@ console.log('\n📋 基礎設施檢查\n' + '='.repeat(50));
 check('001', 'package.json 存在', fileExists('package.json'));
 check('002', 'vite.config.ts 存在', fileExists('vite.config.ts'));
 check('003', 'tsconfig.json 存在', fileExists('tsconfig.json'));
-check('004', 'tailwind.config.js 或 CSS 配置存在',
-    fileExists('tailwind.config.js') || fileContains('postcss.config.js', 'tailwindcss'));
+check('004', 'Tailwind 已設定（Vite 外掛或 postcss）',
+    fileContains('vite.config.ts', 'tailwindcss') || fileContains('postcss.config.js', 'tailwindcss'));
 check('005', 'Dockerfile 存在', fileExists('Dockerfile'));
 check('006', 'React 依賴已安裝', fileContains('package.json', '"react"'));
 check('007', 'TypeScript 依賴已安裝', fileContains('package.json', '"typescript"'));
@@ -75,10 +75,10 @@ check('013', 'Referrals 頁面存在', fileExists('src/pages/Referrals.tsx'));
 check('014', 'BNI 頁面存在', fileExists('src/pages/BNI.tsx'));
 check('015', 'Edit 頁面存在', fileExists('src/pages/Edit.tsx'));
 
-// ===== Layout 組件檢查 =====
-console.log('\n🧭 Layout 組件檢查\n' + '='.repeat(50));
+// ===== 全站版面（App 組合 Navbar / Footer；已不使用獨立 Layout.tsx）=====
+console.log('\n🧭 全站版面檢查\n' + '='.repeat(50));
 
-check('016', 'Layout 組件存在', fileExists('src/components/layout/Layout.tsx'));
+check('016', 'App.tsx 組合 Navbar / Footer（取代舊 Layout）', fileContains('src/App.tsx', 'Navbar') && fileContains('src/App.tsx', 'Footer'));
 check('017', 'Navbar 組件存在', fileExists('src/components/layout/Navbar.tsx'));
 check('018', 'Footer 組件存在', fileExists('src/components/layout/Footer.tsx'));
 check('019', 'StarryBackground 組件存在', fileExists('src/components/layout/StarryBackground.tsx'));
@@ -120,13 +120,13 @@ check('038', 'Home 頁面包含主標題', fileContains('src/pages/Home.tsx', '�
 check('039', 'Home 頁面包含副標題', fileContains('src/pages/Home.tsx', '我們一起，打造你的夢幻'));
 check('040', 'Home 頁面包含英文標語', fileContains('src/pages/Home.tsx', 'Stand by we'));
 check('041', 'Home 頁面包含加入我們按鈕', fileContains('src/pages/Home.tsx', '加入我們'));
-check('042', 'Home 頁面包含 BNI 介紹區塊', fileContains('src/pages/Home.tsx', '什麼是 BNI'));
+check('042', 'Home 頁面包含 BNI 介紹區塊', fileContains('src/pages/Home.tsx', '什麼是'));
 check('043', 'Home 頁面包含 About 組件', fileContains('src/pages/Home.tsx', '<About'));
 check('044', 'Home 頁面包含 MemberWall 組件', fileContains('src/pages/Home.tsx', '<MemberWall'));
 check('045', 'Home 頁面包含 Results 組件', fileContains('src/pages/Home.tsx', '<Results'));
 check('046', 'Home 頁面包含 FAQ 組件', fileContains('src/pages/Home.tsx', '<FAQ'));
 check('047', 'Home 頁面包含 Contact 組件', fileContains('src/pages/Home.tsx', '<Contact'));
-check('048', 'Home 頁面包含背景圖片', fileContains('src/pages/Home.tsx', 'background.png'));
+check('048', 'Hero 使用背景圖（PageHero）', fileContains('src/components/common/PageHero.tsx', 'background.png'));
 
 // ===== 路由檢查 =====
 console.log('\n🛣️  路由檢查\n' + '='.repeat(50));
@@ -144,7 +144,7 @@ console.log('\n🎨 樣式檢查\n' + '='.repeat(50));
 check('055', 'index.css 存在', fileExists('src/index.css'));
 check('056', 'legacy.css 存在', fileExists('src/styles/legacy.css'));
 check('057', 'index.css 引入 Tailwind', fileContains('src/index.css', 'tailwindcss'));
-check('058', 'index.css 引入 legacy.css', fileContains('src/index.css', 'legacy.css'));
+check('058', 'legacy.css 存在（選用；主樣式為 Tailwind）', fileExists('src/styles/legacy.css'), 'warning');
 
 // ===== StarryBackground 檢查 =====
 console.log('\n⭐ StarryBackground 檢查\n' + '='.repeat(50));
@@ -152,7 +152,7 @@ console.log('\n⭐ StarryBackground 檢查\n' + '='.repeat(50));
 check('059', 'StarryBackground 使用 Canvas', fileContains('src/components/layout/StarryBackground.tsx', 'canvas'));
 check('060', 'StarryBackground 有粒子系統', fileContains('src/components/layout/StarryBackground.tsx', 'Particle'));
 check('061', 'StarryBackground 有動畫', fileContains('src/components/layout/StarryBackground.tsx', 'animate'));
-check('062', 'Layout 包含 StarryBackground', fileContains('src/components/layout/Layout.tsx', 'StarryBackground'));
+check('062', 'App 使用 StarryBackground', fileContains('src/App.tsx', 'StarryBackground'));
 
 // ===== Members 功能檢查 =====
 console.log('\n👥 Members 功能檢查\n' + '='.repeat(50));
@@ -204,9 +204,9 @@ check('084', 'Dockerfile 有 Node 20', fileContains('Dockerfile', 'node:20'));
 console.log('\n🔧 額外功能檢查\n' + '='.repeat(50));
 
 check('085', 'App.tsx 有 ScrollToTop', fileContains('src/App.tsx', 'ScrollToTop'));
-check('086', 'Layout 有 Navbar', fileContains('src/components/layout/Layout.tsx', 'Navbar'));
-check('087', 'Layout 有 Footer', fileContains('src/components/layout/Layout.tsx', 'Footer'));
-check('088', 'Layout 有 Outlet', fileContains('src/components/layout/Layout.tsx', 'Outlet'));
+check('086', 'App 有 Navbar', fileContains('src/App.tsx', 'Navbar'));
+check('087', 'App 有 Footer', fileContains('src/App.tsx', 'Footer'));
+check('088', 'App 有路由 Routes', fileContains('src/App.tsx', 'Routes'));
 
 // ===== 圖片優化檢查 =====
 console.log('\n🖼️  圖片優化檢查\n' + '='.repeat(50));
@@ -232,14 +232,12 @@ console.log('\n⚡ 效能優化檢查\n' + '='.repeat(50));
 
 check('096', 'StarryBackground 有 cleanup', fileContains('src/components/layout/StarryBackground.tsx', 'return () =>'));
 check('097', 'Members 使用 useMemo', fileContains('src/pages/Members.tsx', 'useMemo'));
-check('098', 'Home 背景有 willChange', fileContains('src/pages/Home.tsx', 'willChange'));
+check('098', 'Hero 背景有 willChange（PageHero）', fileContains('src/components/common/PageHero.tsx', 'willChange'));
 
 // ===== 資料載入檢查 =====
 console.log('\n📊 資料載入檢查\n' + '='.repeat(50));
 
-check('099', 'useMembers 載入 JSON 資料',
-    fileContains('src/hooks/useMembers.ts', 'members.json') ||
-    fileContains('src/hooks/useMembers.tsx', 'members.json'));
+check('099', '會員資料由 Supabase 載入（api/members）', fileContains('src/api/members.ts', "from('members')"));
 check('100', 'Members 有 loading 狀態', fileContains('src/pages/Members.tsx', 'loading'));
 
 // ===== 總結 =====

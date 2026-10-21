@@ -1,17 +1,17 @@
 {
-  "timestamp": "2025-12-11T07:33:17.732Z",
+  "timestamp": "2026-04-22T00:55:25.666Z",
   "summary": {
     "total": 51,
-    "passed": 48,
-    "failed": 3,
+    "passed": 51,
+    "failed": 0,
     "warnings": 0,
-    "passRate": "94.1%"
+    "passRate": "100.0%"
   },
   "results": {
     "passed": [
       {
         "id": "D001",
-        "description": "dist/index.html 存在",
+        "description": "dist/index.html 存在（已 build 時）",
         "passed": true
       },
       {
@@ -67,6 +67,11 @@
       {
         "id": "P007",
         "description": "background.png 存在",
+        "passed": true
+      },
+      {
+        "id": "P008",
+        "description": "BNI logo 存在（站內使用 bni-logo-new）",
         "passed": true
       },
       {
@@ -136,37 +141,42 @@
       },
       {
         "id": "C008",
-        "description": "Layout.tsx 引用 Navbar",
+        "description": "App.tsx 引用 Navbar",
         "passed": true
       },
       {
         "id": "C009",
-        "description": "Layout.tsx 引用 Footer",
+        "description": "App.tsx 引用 Footer",
         "passed": true
       },
       {
         "id": "C010",
-        "description": "Layout.tsx 引用 StarryBackground",
+        "description": "App.tsx 引用 StarryBackground",
         "passed": true
       },
       {
         "id": "I001",
-        "description": "Home.tsx 引用 background.png",
+        "description": "PageHero 或首頁區塊引用背景（background.png 在 PageHero）",
+        "passed": true
+      },
+      {
+        "id": "I002",
+        "description": "Home.tsx 引用 BNI 相關圖檔",
         "passed": true
       },
       {
         "id": "I003",
-        "description": "BNI.tsx 引用 BNI logo",
+        "description": "BNI 頁使用 PageHero",
         "passed": true
       },
       {
         "id": "I004",
-        "description": "Footer.tsx 引用 logo",
+        "description": "Footer 使用 siteConfig 標誌路徑",
         "passed": true
       },
       {
         "id": "I005",
-        "description": "Navbar.tsx 引用 logo",
+        "description": "Navbar 使用 siteConfig 標誌路徑",
         "passed": true
       },
       {
@@ -186,7 +196,7 @@
       },
       {
         "id": "H004",
-        "description": "useMembers 引用 members.json",
+        "description": "api/members 查詢 members 表",
         "passed": true
       },
       {
@@ -206,12 +216,12 @@
       },
       {
         "id": "DEP004",
-        "description": "Dockerfile 複製 dist",
+        "description": "Dockerfile 從 builder 複製 dist",
         "passed": true
       },
       {
         "id": "DEP005",
-        "description": "Dockerfile 複製 public",
+        "description": "Dockerfile 從 builder 複製 public",
         "passed": true
       },
       {
@@ -240,6 +250,11 @@
         "passed": true
       },
       {
+        "id": "CFG003",
+        "description": "Tailwind 已設定（Vite 外掛或 postcss）",
+        "passed": true
+      },
+      {
         "id": "CFG004",
         "description": "package.json 有 build script",
         "passed": true
@@ -250,23 +265,7 @@
         "passed": true
       }
     ],
-    "failed": [
-      {
-        "id": "P008",
-        "description": "BNI logo 存在",
-        "passed": false
-      },
-      {
-        "id": "I002",
-        "description": "Home.tsx 引用 BNI logo",
-        "passed": false
-      },
-      {
-        "id": "CFG003",
-        "description": "tailwind.config.js 存在",
-        "passed": false
-      }
-    ],
+    "failed": [],
     "warnings": []
   }
 }

@@ -28,7 +28,7 @@ const PageTracker = () => {
                     path: location.pathname,
                     user_agent: navigator.userAgent,
                 });
-            } catch (error) {
+            } catch {
                 // Ignore errors
             }
         };

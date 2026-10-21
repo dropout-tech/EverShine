@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useMembers } from '../../hooks/useMembers';
+import { resolveMemberPhotoObjectPosition } from '../../lib/memberPhotoPosition';
 import { motion } from 'framer-motion';
 
 const MemberThumbnail: React.FC<{ photo: string, name: string, industry: string, photoPosition?: string }> = ({ photo, name, industry, photoPosition }) => {
@@ -26,7 +27,7 @@ const MemberThumbnail: React.FC<{ photo: string, name: string, industry: string,
                 alt={name}
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                style={{ objectPosition: photoPosition || 'center 20%' }}
+                style={{ objectPosition: resolveMemberPhotoObjectPosition(photoPosition) }}
                 onError={() => setImgSrc('/images/assets/logo/白色正方形logo.png')}
             />
             {/* Name and Industry overlay on hover */}

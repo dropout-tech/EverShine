@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../lib/supabase';
+import { fetchPublicMembers } from '../api/members';
+import { queryKeys } from '../api/queryKeys';
 
 export interface Member {
     id: number;
@@ -20,6 +23,8 @@ export interface Member {
     updatedAt?: string;
     phone?: string;
     email?: string;
+    gold_medal_count?: number;
+    has_gold_medal?: boolean;
 }
 
 function normalizePhoto(photo: string) {
@@ -53,55 +58,32 @@ async function loadStaticMembers(): Promise<Member[]> {
 }
 
 export const useMembers = () => {
-    const [members, setMembers] = useState<Member[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
+
+    const query = useQuery({
+        queryKey: queryKeys.members.list,
+        queryFn: fetchPublicMembers,
+        staleTime: 60_000,
+    });
 
     useEffect(() => {
-        let unsubscribe = () => {};
+        // 每個 hook 實例使用唯一 channel 名稱：多處同時 useMembers() 時，若共用名稱會在 subscribe 後重複 .on() 而拋錯導致白畫面
+        const channelName = `members_changes_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+        const subscription = supabase
+            .channel(channelName)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
+                void queryClient.invalidateQueries({ queryKey: queryKeys.members.list });
+            })
+            .subscribe();
 
-        const fetchMembers = async () => {
-            try {
-                setLoading(true);
-                if (!isSupabaseConfigured || !supabase) {
-                    setMembers(await loadStaticMembers());
-                    setError(null);
-                    return;
-                }
-
-                const { data, error } = await supabase
-                    .from('members')
-                    .select('*')
-                    .order('id', { ascending: true });
-
-                if (error) throw error;
-                setMembers(data || []);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching members:', err);
-                try {
-                    setMembers(await loadStaticMembers());
-                    setError(null);
-                } catch {
-                    setError('無法載入會員資料');
-                }
-            } finally {
-                setLoading(false);
-            }
+        return () => {
+            void supabase.removeChannel(subscription);
         };
+    }, [queryClient]);
 
-        fetchMembers();
-
-        if (isSupabaseConfigured && supabase) {
-            const subscription = supabase
-                .channel('members_changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, fetchMembers)
-                .subscribe();
-            unsubscribe = () => subscription.unsubscribe();
-        }
-
-        return () => unsubscribe();
-    }, []);
-
-    return { members, loading, error };
+    return {
+        members: query.data ?? [],
+        loading: query.isPending,
+        error: query.isError ? '無法載入會員資料' : null,
+    };
 };

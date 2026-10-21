@@ -6,7 +6,7 @@ import SEO from '../components/common/SEO';
 
 const NotFound: React.FC = () => {
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+        <div className="min-h-dvh flex items-center justify-center px-4 pt-24 pb-12 md:pt-32 relative overflow-hidden">
             <SEO title="找不到頁面" noindex />
             {/* Background gradient effects */}
             <div className="absolute inset-0 bg-gradient-to-br from-bg-dark via-[#0a1628] to-bg-dark"></div>

@@ -64,7 +64,10 @@ CREATE POLICY "members_public_read"
 CREATE POLICY "members_self_update"
   ON public.members FOR UPDATE
   USING ( CAST(user_id AS text) = CAST(auth.uid() AS text) )
-  WITH CHECK ( CAST(user_id AS text) = CAST(auth.uid() AS text) );
+  WITH CHECK (
+    CAST(user_id AS text) = CAST(auth.uid() AS text)
+    OR user_id IS NULL
+  );
 
 CREATE POLICY "members_admin_update"
   ON public.members FOR UPDATE
@@ -78,11 +81,7 @@ CREATE POLICY "members_admin_delete"
   ON public.members FOR DELETE
   USING ( public.is_admin() );
 
-CREATE POLICY "members_claim_unclaimed"
-  ON public.members FOR UPDATE
-  USING ( user_id IS NULL AND auth.uid() IS NOT NULL )
-  WITH CHECK ( auth.uid() IS NOT NULL );
-
+-- 認領綁定 user_id 改由 public.claim_member() SECURITY DEFINER 處理（含已認領時之 Email 驗證）
 
 -- ============================================================
 -- PART 3: referrals 表

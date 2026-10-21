@@ -156,3 +156,30 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* 會員卡片：極細霓虹藍邊框呼吸（低調循環，不影響可讀性） */
+@keyframes member-card-neon-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.22),
+      0 0 14px rgba(59, 130, 246, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(147, 197, 253, 0.55),
+      0 0 26px rgba(59, 130, 246, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  }
+}
+
+.member-card-neon-breathe {
+  animation: member-card-neon-breathe 2.8s ease-in-out infinite;
+}
+
+.member-card-neon-breathe:hover,
+.member-card-neon-breathe:focus-within {
+  animation: member-card-neon-breathe 1.6s ease-in-out infinite;
+}

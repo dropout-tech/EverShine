@@ -55,7 +55,16 @@ const Footer: React.FC = () => {
                         </Link>
                     </div>
                     <p className="text-center font-bold text-white/80">
-                        本網站由 琢奧科技有限公司 DropOut Tech Consulting Co., Ltd. 開發與維護，網站與系統開發歡迎洽詢{' '}
+                        本網站由{' '}
+                        <a
+                            href="https://dropout.tw"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-white hover:underline transition-colors"
+                        >
+                            琢奧科技有限公司 DropOut Tech Consulting Co., Ltd.
+                        </a>
+                        {' '}開發與維護，網站與系統開發歡迎洽詢{' '}
                         <a href="mailto:info@dropout.tw" className="text-primary hover:underline hover:text-white transition-colors">
                             info@dropout.tw
                         </a>

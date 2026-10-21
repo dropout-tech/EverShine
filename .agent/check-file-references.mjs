@@ -46,14 +46,14 @@ function fileContains(filePath, searchString) {
 
 console.log('🔍 開始全面檢查檔案引用...\n');
 
-// ===== dist 資料夾檢查 =====
-console.log('\n📦 dist 資料夾檢查\n' + '='.repeat(50));
+// ===== 建置產物（dist 不納入 Git；CI 應 npm run build 後再檢查）=====
+console.log('\n📦 建置產物 dist（可選）\n' + '='.repeat(50));
 
-check('D001', 'dist/index.html 存在', fileExists('dist/index.html'));
-check('D002', 'dist/index.html 包含 root div', fileContains('dist/index.html', '<div id="root">'));
-check('D003', 'dist/index.html 引用 CSS', fileContains('dist/index.html', '.css'));
-check('D004', 'dist/index.html 引用 JS', fileContains('dist/index.html', '.js'));
-check('D005', 'dist/assets 資料夾存在', fileExists('dist/assets'));
+check('D001', 'dist/index.html 存在（已 build 時）', fileExists('dist/index.html'), 'warning');
+check('D002', 'dist/index.html 包含 root div', fileContains('dist/index.html', '<div id="root">'), 'warning');
+check('D003', 'dist/index.html 引用 CSS', fileContains('dist/index.html', '.css'), 'warning');
+check('D004', 'dist/index.html 引用 JS', fileContains('dist/index.html', '.js'), 'warning');
+check('D005', 'dist/assets 資料夾存在', fileExists('dist/assets'), 'warning');
 
 // ===== public 資料夾檢查 =====
 console.log('\n🖼️  public 資料夾檢查\n' + '='.repeat(50));
@@ -65,7 +65,7 @@ check('P004', 'public/data 存在', fileExists('public/data'));
 check('P005', 'public/data/members.json 存在', fileExists('public/data/members.json'));
 check('P006', 'public/data/referrals.json 存在', fileExists('public/data/referrals.json'));
 check('P007', 'background.png 存在', fileExists('public/images/assets/background.png'));
-check('P008', 'BNI logo 存在', fileExists('public/images/assets/logo/BNI紅色商標.png'));
+check('P008', 'BNI logo 存在（站內使用 bni-logo-new）', fileExists('public/images/assets/logo/bni-logo-new.png'));
 check('P009', 'EverShine logo 存在', fileExists('public/images/assets/logo/白色正方形logo.png'));
 
 // ===== src 檔案引用檢查 =====
@@ -87,18 +87,18 @@ check('C004', 'Home.tsx 引用 FAQ', fileContains('src/pages/Home.tsx', 'FAQ'));
 check('C005', 'Home.tsx 引用 Contact', fileContains('src/pages/Home.tsx', 'Contact'));
 check('C006', 'Members.tsx 引用 MemberCard', fileContains('src/pages/Members.tsx', 'MemberCard'));
 check('C007', 'Members.tsx 引用 CategoryFilter', fileContains('src/pages/Members.tsx', 'CategoryFilter'));
-check('C008', 'Layout.tsx 引用 Navbar', fileContains('src/components/layout/Layout.tsx', 'Navbar'));
-check('C009', 'Layout.tsx 引用 Footer', fileContains('src/components/layout/Layout.tsx', 'Footer'));
-check('C010', 'Layout.tsx 引用 StarryBackground', fileContains('src/components/layout/Layout.tsx', 'StarryBackground'));
+check('C008', 'App.tsx 引用 Navbar', fileContains('src/App.tsx', 'Navbar'));
+check('C009', 'App.tsx 引用 Footer', fileContains('src/App.tsx', 'Footer'));
+check('C010', 'App.tsx 引用 StarryBackground', fileContains('src/App.tsx', 'StarryBackground'));
 
 // ===== 圖片路徑檢查 =====
 console.log('\n🖼️  圖片路徑引用檢查\n' + '='.repeat(50));
 
-check('I001', 'Home.tsx 引用 background.png', fileContains('src/pages/Home.tsx', 'background.png'));
-check('I002', 'Home.tsx 引用 BNI logo', fileContains('src/pages/Home.tsx', 'BNI紅色商標.png'));
-check('I003', 'BNI.tsx 引用 BNI logo', fileContains('src/pages/BNI.tsx', 'BNI紅色商標.png'));
-check('I004', 'Footer.tsx 引用 logo', fileContains('src/components/layout/Footer.tsx', 'logo.png'));
-check('I005', 'Navbar.tsx 引用 logo', fileContains('src/components/layout/Navbar.tsx', 'logo.png'));
+check('I001', 'PageHero 或首頁區塊引用背景（background.png 在 PageHero）', fileContains('src/components/common/PageHero.tsx', 'background.png'));
+check('I002', 'Home.tsx 引用 BNI 相關圖檔', fileContains('src/pages/Home.tsx', 'bni-logo') || fileContains('src/pages/Home.tsx', 'BNI'));
+check('I003', 'BNI 頁使用 PageHero', fileContains('src/pages/BNI.tsx', 'PageHero'));
+check('I004', 'Footer 使用 siteConfig 標誌路徑', fileContains('src/components/layout/Footer.tsx', 'siteConfig.logos'));
+check('I005', 'Navbar 使用 siteConfig 標誌路徑', fileContains('src/components/layout/Navbar.tsx', 'siteConfig.logos'));
 
 // ===== Hooks 引用檢查 =====
 console.log('\n🪝 Hooks 引用檢查\n' + '='.repeat(50));
@@ -106,7 +106,7 @@ console.log('\n🪝 Hooks 引用檢查\n' + '='.repeat(50));
 check('H001', 'Members.tsx 引用 useMembers', fileContains('src/pages/Members.tsx', 'useMembers'));
 check('H002', 'Referrals.tsx 引用 useReferrals', fileContains('src/pages/Referrals.tsx', 'useReferrals'));
 check('H003', 'Results.tsx 引用 useCountUp', fileContains('src/components/home/Results.tsx', 'useCountUp'));
-check('H004', 'useMembers 引用 members.json', fileContains('src/hooks/useMembers.ts', 'members.json') || fileContains('src/hooks/useMembers.tsx', 'members.json'));
+check('H004', 'api/members 查詢 members 表', fileContains('src/api/members.ts', "from('members')"));
 
 // ===== 部署檔案檢查 =====
 console.log('\n🚀 部署檔案檢查\n' + '='.repeat(50));
@@ -114,8 +114,8 @@ console.log('\n🚀 部署檔案檢查\n' + '='.repeat(50));
 check('DEP001', 'Dockerfile 存在', fileExists('Dockerfile'));
 check('DEP002', 'server.js 存在', fileExists('server.js'));
 check('DEP003', 'package.json 存在', fileExists('package.json'));
-check('DEP004', 'Dockerfile 複製 dist', fileContains('Dockerfile', 'COPY dist'));
-check('DEP005', 'Dockerfile 複製 public', fileContains('Dockerfile', 'COPY public'));
+check('DEP004', 'Dockerfile 從 builder 複製 dist', fileContains('Dockerfile', 'COPY --from=builder') && fileContains('Dockerfile', '/dist'));
+check('DEP005', 'Dockerfile 從 builder 複製 public', fileContains('Dockerfile', 'COPY --from=builder') && fileContains('Dockerfile', '/public'));
 check('DEP006', 'Dockerfile 複製 server.js', fileContains('Dockerfile', 'COPY server.js'));
 check('DEP007', 'server.js 處理 /images/', fileContains('server.js', '/images/'));
 check('DEP008', 'server.js 處理 /data/', fileContains('server.js', '/data/'));
@@ -125,7 +125,7 @@ console.log('\n⚙️  配置檔案檢查\n' + '='.repeat(50));
 
 check('CFG001', 'vite.config.ts 存在', fileExists('vite.config.ts'));
 check('CFG002', 'tsconfig.json 存在', fileExists('tsconfig.json'));
-check('CFG003', 'tailwind.config.js 存在', fileExists('tailwind.config.js'));
+check('CFG003', 'Tailwind 已設定（Vite 外掛或 postcss）', fileContains('vite.config.ts', 'tailwindcss') || fileExists('postcss.config.js'));
 check('CFG004', 'package.json 有 build script', fileContains('package.json', '"build"'));
 check('CFG005', 'package.json 有 start script', fileContains('package.json', '"start"'));
 

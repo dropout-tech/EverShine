@@ -32,12 +32,18 @@
 
 ### 3. 引薦報告 (Referrals Page) - 成果展示
 *   **[Referral Stats] 統計數據**：展示分會內部的互助成果。
-*   **[Showcase] 引薦案例**：分享成功的商務對接故事。
+*   **[Showcase] 引薦案例**：分享成功的商務對接故事。列表為手機單欄、平板兩欄、桌面三欄。前台以 Supabase `referrals` 為主，並合併 `src/data/referral-cases-extra.json`（同一 `id` 以資料庫為準）。新增案例後請執行 `python3 scripts/build_referrals_extra_sql.py`，再到 Supabase SQL Editor 執行產生的 SQL，讓後台列表同步。客戶品牌請走 `src/data/referral-brand-replacements.json` 去識別化（夥伴自己的公司名可保留）。
 
 ### 4. 會員中心 (Member Edit) - 自主管理
 *   **[Auth] 會員登入**：支援 Email 與 Google 快速登入。
 *   **[Editor] 資料編輯**：固定式儲存標頭，支援即時預覽與圖片壓縮。
 *   **[Self-Management] 內容掌控**：成員可隨時更新自己的產業定位與服務項目。
+
+### 5. 管理後台 (Admin) - EverShine OS
+*   **[入口]** `/login` 登入已綁定、且 `members.is_admin = true` 的帳號，導覽列出現「管理後台」，或直接開 `/admin`。
+*   **[選單]** 左側功能選單：委員會紀錄（預設）、會員管理、引薦管理；來賓跟進為規劃中。目前位置寫在網址 `?m=<模組>&v=<分頁>`，可直接分享。
+*   **[委員會紀錄]** 每場會議有日期、紀錄者、請假者，議程分 1. 會員追蹤、2. 對例會建議、3. 特別討論事項、4. 其他事項。每一項可加會後行動（負責人、期限）。沒結案的行動會自動出現在之後每一場會議的「上次追蹤事項」，直到在會中按完成或取消；「行動追蹤」分頁列出全部行動。可定稿鎖定、複製文字版貼 LINE。
+*   **[資料表]** 第一次使用前要在 Supabase SQL Editor 執行 `scripts/migration_committee_meetings_20261006.sql`。只有在籍且 `is_admin` 的會員能讀寫；之後要開放給委員會成員，改 `can_access_committee()`。
 
 ---
 
@@ -94,8 +100,9 @@ Pages 只放靜態檔，加一支處理 `/` 的 Function。`server.js` 的頁首
 | 環境變數 `NODE_VERSION` | `22`（Vite 7 需要 Node 20.19+ 或 22.12+） |
 | 建置環境變數 | `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_CLAIM_PASSWORD`、`VITE_TURNSTILE_SITE_KEY`、`VITE_GA_ID`、`VITE_FB_PIXEL_ID`、`VITE_CLARITY_ID` |
 
-- Pages 沒有執行中的 `server.js`，不會注入 `window.__EVERSHINE_ENV__`。上面這組變數一定要在建置時設定，否則會打包成空值。
-- `npm run build` 會為每個路由產生一個檔案：`dist/index.html`（首頁）、`dist/bni.html` 等 SEO 頁、`dist/login.html` 等不索引頁，以及 `dist/404.html`。Pages 以 `/bni` 提供 `bni.html`，未知路徑回 404。
+- 會員、引薦、登入、認領與後台都走 Supabase Auth 與資料表。倉庫裡的 `.env` 提供公開的 anon 連線，建置時會寫進前端；Cloudflare 若另外設定同名變數，`functions/_middleware.js` 會在每個 HTML 注入並覆蓋它。
+- Email 登入需要與 Supabase 驗證碼密鑰成對的 `VITE_TURNSTILE_SITE_KEY`。沒有這把 site key 時，請用 Google 登入。分會認領密碼預設是 `evershine2026`。
+- `npm run build` 會為每個已知路由產生一個檔案：`dist/index.html`、`dist/bni.html`、`dist/login.html`、`dist/404.html`。個別會員頁 `/member/:slug` 由 `public/_redirects` 交回同一個前端。
 - `functions/index.js` 只處理 `/`，每次回應時把例會日期改成下一個週三。
 - 快取與 `X-Robots-Tag` 寫在 `public/_headers`。
 - Zeabur 用 `npm run build:zeabur`（只跑 `vite build`）：`server.js` 依每次請求改寫原始樣板，不能讀已預先產生的首頁。

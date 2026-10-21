@@ -1447,7 +1447,7 @@
       "id": "member-41",
       "name": "吳貞妮",
       "photo": "images/members/吳貞妮.jpg",
-      "industry": "插畫設計",
+      "industry": "文創商業設計",
       "category": "企業行銷",
       "company": "拉蒂設計LuxurWind_個人工作室",
       "position": "董事長",
@@ -2143,6 +2143,8 @@
     {
       "id": "member-1765644959177-6105",
       "name": "湯益承",
+      "status": "frozen",
+      "membership_type": "resigned",
       "photo": "images/members/湯益承.jpg",
       "industry": "永續可分解包裝",
       "company": "謙益科技股份有限公司",

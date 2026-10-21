@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 
 <head>
-  <!-- evershine-release: 2026-10-14-r2 -->
+  <!-- evershine-release: 2026-10-21-dreamone -->
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/images/assets/logo/白色正方形logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -313,7 +313,7 @@
   </script>
 
   <!-- Cloudflare Turnstile -->
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer onload="window.dispatchEvent(new Event('evershine-turnstile-ready'))"></script>
 </head>
 
 <body>

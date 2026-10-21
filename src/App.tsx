@@ -11,6 +11,7 @@ import PageTracker from './components/common/PageTracker';
 import BottomNav from './components/layout/BottomNav';
 import Home from './pages/Home';
 import Members from './pages/Members';
+import MemberPage from './pages/MemberPage';
 import Referrals from './pages/Referrals';
 import MemberEdit from './pages/MemberEdit';
 import BNI from './pages/BNI';
@@ -18,6 +19,7 @@ import Login from './pages/Login';
 import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
+
 import { AuthProvider } from './contexts/AuthContext';
 
 const AnimatedRoutes = () => {
@@ -25,7 +27,7 @@ const AnimatedRoutes = () => {
 
   // Force external browser for social App WebViews (LINE, FB, IG)
   useEffect(() => {
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const ua = navigator.userAgent || navigator.vendor || '';
     const isLine = /Line\//i.test(ua);
     const isFb = /FBAN|FBAV/i.test(ua);
     const isIg = /Instagram/i.test(ua);
@@ -48,6 +50,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/bni" element={<BNI />} />
         <Route path="/members" element={<Members />} />
+        <Route path="/member/:slug" element={<MemberPage />} />
         <Route path="/referrals" element={<Referrals />} />
         <Route path="/login" element={<Login />} />
         <Route path="/member-edit" element={<MemberEdit />} />

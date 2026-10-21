@@ -5,6 +5,8 @@
  * 所有品牌相關的硬編碼值都應從此處引用。
  */
 
+import { publicEnv } from '../lib/supabase';
+
 export const siteConfig = {
     branchName: '長輝白金分會',
     branchNameEn: 'EverShine',
@@ -53,18 +55,17 @@ export const siteConfig = {
     defaultPhoto: '/images/assets/logo/白色正方形logo.png',
 
     /** Claim 密碼應從環境變數讀取，fallback 僅供開發環境 */
-    claimPassword: import.meta.env.VITE_CLAIM_PASSWORD || 'evershine2025',
+    claimPassword: publicEnv('VITE_CLAIM_PASSWORD') || 'evershine2026',
 
     industries: [
-        '居住與空間工程',
-        '企業營運與法稅',
-        '金融財富與資產',
+        '居住空間與工程',
         '品牌整合與行銷',
-        '數位AI與創新科技',
-        '身心健康與醫療',
-        '飲食文化與食品',
-        '教育學習與休閒',
-        '永續發展與製造',
+        '健康照護與身心',
+        '金融財富與資產',
+        '數位科技與應用',
+        '學習成長與探索',
+        '生活服務與消費',
+        '企業經營與法稅',
     ],
 } as const;
 

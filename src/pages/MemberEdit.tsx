@@ -8,10 +8,25 @@ import imageCompression from 'browser-image-compression';
 import { useAuth } from '../contexts/AuthContext';
 import type { Member } from '../types';
 import SEO from '../components/common/SEO';
+import { CardSkeleton } from '../components/loading';
 import { sanitizeText, sanitizeUrl } from '../lib/sanitize';
+import { formatTaiwanPhoneDisplay } from '../lib/phoneFormat';
 import { siteConfig } from '../config/site.config';
+import { resolveMemberPhotoObjectPosition } from '../lib/memberPhotoPosition';
 
-const CATEGORIES = [...siteConfig.industries];
+const CATEGORIES: string[] = [...siteConfig.industries];
+
+// 欄位字數上限（與 Supabase column 長度與資料庫合理性對齊）
+const LIMITS = {
+    name: 50,
+    company: 100,
+    position: 50,
+    industry: 50,
+    shortIntro: 100,
+    fullIntro: 3000,
+    service: 100,
+    hashtag: 30,
+} as const;
 
 interface MemberLink {
     type: string;
@@ -46,7 +61,7 @@ const MemberEdit: React.FC = () => {
 
     // Photo
     const [photo, setPhoto] = useState('');
-    const [photoPosition, setPhotoPosition] = useState('center');
+    const [photoPosition, setPhotoPosition] = useState('top');
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [phone, setPhone] = useState('');
@@ -54,6 +69,9 @@ const MemberEdit: React.FC = () => {
 
     // Track if there are unsaved changes
     const [hasChanges, setHasChanges] = useState(false);
+
+    const [isAdminUser, setIsAdminUser] = useState(false);
+    const [unbindLoading, setUnbindLoading] = useState(false);
 
     // Helper to update state and mark as dirty
     const updateField = (setter: (val: any) => void, value: any) => {
@@ -84,6 +102,7 @@ const MemberEdit: React.FC = () => {
                 .single();
 
             const isAdmin = currentUserData?.is_admin === true;
+            setIsAdminUser(isAdmin);
 
             // 2. Check URL params for target ID
             const searchParams = new URLSearchParams(window.location.search);
@@ -104,6 +123,15 @@ const MemberEdit: React.FC = () => {
             if (error) throw error;
             if (data) {
                 const m = data as Member;
+
+                // 冷凍會員不得進入編輯頁（非 admin 本人進自己）
+                if (!targetId && m.status && m.status !== 'active') {
+                    alert(`歡迎您隨時回到 ${siteConfig.branchFullName}，我們隨時歡迎您。`);
+                    await signOut();
+                    navigate('/');
+                    return;
+                }
+
                 setMemberId(m.id.toString());
                 setName(m.name);
                 setCompany(m.company || '');
@@ -112,8 +140,8 @@ const MemberEdit: React.FC = () => {
                 setShortIntro(m.shortIntro || '');
                 setFullIntro(m.fullIntro || '');
                 setPhoto((m.photo || '').trim());
-                setPhotoPosition(m.photoPosition || 'center');
-                setPhone(m.phone || '');
+                setPhotoPosition(m.photoPosition?.trim() ? m.photoPosition : 'top');
+                setPhone(formatTaiwanPhoneDisplay(m.phone || ''));
                 setEmail(m.email || '');
 
                 // Handle Arrays
@@ -166,6 +194,46 @@ const MemberEdit: React.FC = () => {
         }
     };
 
+    const editingOtherMember = Boolean(
+        typeof window !== 'undefined' &&
+            new URLSearchParams(window.location.search).get('id') &&
+            isAdminUser
+    );
+
+    const handleUnbindProfile = async () => {
+        if (!user || !memberId || editingOtherMember) return;
+        if (
+            !confirm(
+                '確定要「解除綁定」嗎？解除後此會員卡將開放給他人認領，您需重新登入並再次認領。'
+            )
+        ) {
+            return;
+        }
+        setUnbindLoading(true);
+        try {
+            const { error } = await supabase
+                .from('members')
+                .update({ user_id: null, updatedAt: new Date().toISOString() })
+                .eq('id', memberId)
+                .eq('user_id', user.id);
+
+            if (error) throw error;
+            await signOut();
+            navigate('/login');
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            setMessage({
+                text:
+                    '解除綁定失敗：' +
+                    msg +
+                    '（若持續失敗，請確認 Supabase 已套用 members_self_update 的 RLS 更新）',
+                type: 'error',
+            });
+        } finally {
+            setUnbindLoading(false);
+        }
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -214,6 +282,33 @@ const MemberEdit: React.FC = () => {
 
     const handleSubmit = async () => {
         if (!user) return;
+
+        // 超字數驗證：不裁剪，直接擋下並提示要求刪減
+        const overLimitFields: string[] = [];
+        if (shortIntro.length > LIMITS.shortIntro) {
+            overLimitFields.push(`簡短介紹（${shortIntro.length}/${LIMITS.shortIntro}）`);
+        }
+        if (fullIntro.length > LIMITS.fullIntro) {
+            overLimitFields.push(`完整介紹（${fullIntro.length}/${LIMITS.fullIntro}）`);
+        }
+        if (name.length > LIMITS.name) {
+            overLimitFields.push(`姓名（${name.length}/${LIMITS.name}）`);
+        }
+        if (company.length > LIMITS.company) {
+            overLimitFields.push(`公司（${company.length}/${LIMITS.company}）`);
+        }
+        if (position.length > LIMITS.position) {
+            overLimitFields.push(`職稱（${position.length}/${LIMITS.position}）`);
+        }
+        if (overLimitFields.length > 0) {
+            setMessage({
+                text: `以下欄位超過字數上限，請先刪減後再儲存：${overLimitFields.join('、')}`,
+                type: 'error',
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setLoading(true);
         setMessage(null);
 
@@ -245,19 +340,19 @@ const MemberEdit: React.FC = () => {
             });
 
             const updates = {
-                name: sanitizeText(name, 50),
-                company: sanitizeText(company, 100),
-                position: sanitizeText(position, 50),
-                industry: sanitizeText(industry, 50),
-                category: selectedCategories.map(c => sanitizeText(c, 30)).join(','),
-                shortIntro: sanitizeText(shortIntro, 200),
-                fullIntro: sanitizeText(fullIntro, 3000),
-                services: services.filter(s => s.trim()).map(s => sanitizeText(s, 100)),
-                hashtags: hashtags.filter(h => h.trim()).map(h => sanitizeText(h, 30)),
+                name: sanitizeText(name, LIMITS.name),
+                company: sanitizeText(company, LIMITS.company),
+                position: sanitizeText(position, LIMITS.position),
+                industry: sanitizeText(industry, LIMITS.industry),
+                category: selectedCategories.map(c => sanitizeText(c, LIMITS.hashtag)).join(','),
+                shortIntro: sanitizeText(shortIntro, LIMITS.shortIntro),
+                fullIntro: sanitizeText(fullIntro, LIMITS.fullIntro),
+                services: services.filter(s => s.trim()).map(s => sanitizeText(s, LIMITS.service)),
+                hashtags: hashtags.filter(h => h.trim()).map(h => sanitizeText(h, LIMITS.hashtag)),
                 links: linksObject,
                 photo: currentPhotoUrl,
                 photoPosition,
-                phone: sanitizeText(phone, 20),
+                phone: sanitizeText(formatTaiwanPhoneDisplay(phone), 25),
                 email: sanitizeText(email, 100),
                 updatedAt: new Date().toISOString(),
             };
@@ -282,7 +377,21 @@ const MemberEdit: React.FC = () => {
         }
     };
 
-    if (authLoading) return <div className="min-h-screen text-white flex items-center justify-center">載入中...</div>;
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-12">
+                <CardSkeleton className="w-full max-w-2xl" />
+            </div>
+        );
+    }
+
+    if (user && loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-12">
+                <CardSkeleton className="w-full max-w-2xl" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-dvh pt-24 md:pt-32 pb-32 md:pb-12 px-4 container mx-auto max-w-4xl">
@@ -361,7 +470,7 @@ const MemberEdit: React.FC = () => {
                                     src={previewUrl || (photo ? photo.trim() : '') || '/images/assets/logo/白色正方形logo.png'}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
-                                    style={{ objectPosition: photoPosition }}
+                                    style={{ objectPosition: resolveMemberPhotoObjectPosition(photoPosition) }}
                                 />
                                 <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 md:group-hover:opacity-100 transition-opacity cursor-pointer md:opacity-0">
                                     <input type="file" onChange={handleFileUpload} accept="image/*" className="hidden" />
@@ -397,6 +506,22 @@ const MemberEdit: React.FC = () => {
                                     會員編號: {memberId || '-'}
                                 </div>
                             </div>
+
+                            {!editingOtherMember && (
+                                <div className="mt-6 pt-6 border-t border-white/10">
+                                    <p className="text-xs text-gray-500 mb-2 leading-relaxed">
+                                        若要改以其他帳號認領此會員卡，請先解除綁定，再登入新帳號並重新認領。
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={handleUnbindProfile}
+                                        disabled={unbindLoading || loading}
+                                        className="w-full py-2.5 rounded-lg text-sm font-medium border border-amber-500/40 text-amber-200/90 hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+                                    >
+                                        {unbindLoading ? '處理中…' : '解除會員綁定'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -445,6 +570,7 @@ const MemberEdit: React.FC = () => {
                                             type="tel"
                                             value={phone}
                                             onChange={(e) => updateField(setPhone, e.target.value)}
+                                            onBlur={() => setPhone((p) => formatTaiwanPhoneDisplay(p))}
                                             placeholder="例：0912-345-678"
                                             className="w-full bg-black/30 border border-white/20 rounded-lg p-3 text-base text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
                                         />
@@ -503,27 +629,49 @@ const MemberEdit: React.FC = () => {
                         {/* Intro Section */}
                         <div className="bg-bg-dark/80 backdrop-blur border border-white/10 rounded-2xl p-6 md:p-8">
                             <h2 className="text-xl font-bold text-primary mb-6 border-b border-white/10 pb-4">📣 自我介紹</h2>
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <div>
-                                    <label className="block text-gray-300 mb-2 font-medium">簡短介紹 (列表頁顯示)</label>
+                                    <label className="block text-gray-300 mb-2 font-medium">
+                                        簡短介紹 <span className="text-xs text-gray-500">(列表頁顯示)</span>
+                                    </label>
                                     <textarea
                                         value={shortIntro}
                                         onChange={(e) => updateField(setShortIntro, e.target.value)}
-                                        maxLength={100}
-                                        className="w-full bg-black/30 border border-white/20 rounded-lg p-3 text-base text-white focus:border-primary focus:outline-none h-24 resize-none"
+                                        className={`w-full bg-black/30 border rounded-lg p-4 text-base text-white focus:outline-none h-32 resize-y leading-relaxed transition-colors ${
+                                            shortIntro.length > LIMITS.shortIntro
+                                                ? 'border-red-500/60 focus:border-red-400'
+                                                : 'border-white/20 focus:border-primary'
+                                        }`}
                                         placeholder="一句話介紹您的專業..."
                                     />
-                                    <div className="text-right text-xs text-gray-500">{shortIntro.length}/100</div>
+                                    <div className={`mt-1 text-right text-xs font-mono ${shortIntro.length > LIMITS.shortIntro ? 'text-red-400 font-bold' : 'text-gray-500'}`}>
+                                        {shortIntro.length} / {LIMITS.shortIntro}
+                                        {shortIntro.length > LIMITS.shortIntro && (
+                                            <span className="ml-2">已超過 {shortIntro.length - LIMITS.shortIntro} 字，請刪減</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="block text-gray-300 mb-2 font-medium">完整介紹 (詳細頁顯示)</label>
+                                    <label className="block text-gray-300 mb-2 font-medium">
+                                        完整介紹 <span className="text-xs text-gray-500">(詳細頁顯示)</span>
+                                    </label>
                                     <textarea
                                         value={fullIntro}
                                         onChange={(e) => updateField(setFullIntro, e.target.value)}
-                                        className="w-full bg-black/30 border border-white/20 rounded-lg p-3 text-base text-white focus:border-primary focus:outline-none h-48"
-                                        placeholder="詳細說明您的服務內容、經歷與優勢..."
+                                        className={`w-full bg-black/30 border rounded-lg p-4 text-base text-white focus:outline-none h-72 md:h-96 resize-y leading-relaxed transition-colors ${
+                                            fullIntro.length > LIMITS.fullIntro
+                                                ? 'border-red-500/60 focus:border-red-400'
+                                                : 'border-white/20 focus:border-primary'
+                                        }`}
+                                        placeholder={`詳細說明您的服務內容、經歷與優勢...\n\n小技巧：在內文加入下面這段，系統會自動把它獨立顯示在彈窗右上方：\n【理想引薦對象】\n例如：骨科、復健科醫師，醫院及診所`}
                                     />
-                                    <p className="mt-2 text-xs text-primary/70 leading-relaxed italic">
+                                    <div className={`mt-1 text-right text-xs font-mono ${fullIntro.length > LIMITS.fullIntro ? 'text-red-400 font-bold' : 'text-gray-500'}`}>
+                                        {fullIntro.length} / {LIMITS.fullIntro}
+                                        {fullIntro.length > LIMITS.fullIntro && (
+                                            <span className="ml-2">已超過 {fullIntro.length - LIMITS.fullIntro} 字，請刪減</span>
+                                        )}
+                                    </div>
+                                    <p className="mt-3 text-xs text-primary/70 leading-relaxed italic">
                                         💡 <strong>AI 搜尋優化小提醒：</strong>建議使用自然語言描述。例如：「我是一位專門協助電商企業處理節稅問題的專業會計師...」這能幫助 AI 搜尋引擎 (如 ChatGPT/Perplexity) 更精準地將您推薦給目標客戶。
                                     </p>
                                 </div>

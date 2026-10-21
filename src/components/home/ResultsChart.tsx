@@ -1,20 +1,56 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { useQuery } from '@tanstack/react-query';
+import { fetchHomepageStatsForChart, type HomepageStatsRow } from '../../api/dashboard';
+import { queryKeys } from '../../api/queryKeys';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+
+/** 後備假資料：DB 撈不到時才用，確保前台不會出現空白圖 */
+const FALLBACK_ROWS: HomepageStatsRow[] = [
+    { month: '2025-05', referral_count: 631, referral_value: 15606645, guest_count: 15 },
+    { month: '2025-06', referral_count: 456,  referral_value: 2144319, guest_count: 21 },
+    { month: '2025-07', referral_count: 590,  referral_value: 9160680, guest_count: 17 },
+    { month: '2025-08', referral_count: 515, referral_value: 11098799, guest_count:  9 },
+    { month: '2025-09', referral_count: 485,  referral_value: 2695123, guest_count: 10 },
+    { month: '2025-10', referral_count: 613, referral_value: 11050631, guest_count: 16 },
+    { month: '2025-11', referral_count: 441,  referral_value: 6894708, guest_count: 29 },
+    { month: '2025-12', referral_count: 578, referral_value: 28846258, guest_count: 24 },
+];
+
+/** 'YYYY-MM' → 顯示用「5月」（同年內）或「2025/05」（跨年時自動帶年） */
+function formatMonthLabels(rows: HomepageStatsRow[]): string[] {
+    const years = new Set(rows.map((r) => r.month.slice(0, 4)));
+    const crossYear = years.size > 1;
+    return rows.map((r) => {
+        if (!/^\d{4}-\d{2}$/.test(r.month)) return r.month;
+        const [y, m] = r.month.split('-');
+        if (crossYear) return `${y.slice(2)}/${parseInt(m, 10)}月`;
+        return `${parseInt(m, 10)}月`;
+    });
+}
 
 const ResultsChart: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chartRef = useRef<any>(null);
     const [activeTab, setActiveTab] = useState<'referrals' | 'amounts' | 'guests'>('referrals');
 
-    const performanceData = {
-        labels: ['5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-        referrals: [631, 456, 590, 515, 485, 613, 441, 578],
-        amounts: [15606645, 2144319, 9160680, 11098799, 2695123, 11050631, 6894708, 28846258],
-        guests: [15, 21, 17, 9, 10, 16, 29, 24]
-    };
+    const { data: rowsRaw, isLoading } = useQuery({
+        queryKey: queryKeys.homepageStats.chart,
+        queryFn: () => fetchHomepageStatsForChart(12),
+        staleTime: 5 * 60_000,
+    });
+
+    const rows = useMemo<HomepageStatsRow[]>(() => {
+        const fromDb = rowsRaw && rowsRaw.length > 0 ? rowsRaw : null;
+        return fromDb ?? FALLBACK_ROWS;
+    }, [rowsRaw]);
+
+    const labels = useMemo(() => formatMonthLabels(rows), [rows]);
+    const referrals = useMemo(() => rows.map((r) => r.referral_count), [rows]);
+    const amounts = useMemo(() => rows.map((r) => r.referral_value), [rows]);
+    const guests = useMemo(() => rows.map((r) => r.guest_count), [rows]);
 
     const createGradient = (ctx: CanvasRenderingContext2D, color: string) => {
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -45,10 +81,10 @@ const ResultsChart: React.FC = () => {
         switch (activeTab) {
             case 'referrals':
                 return {
-                    labels: performanceData.labels,
+                    labels,
                     datasets: [{
                         label: '引薦單數',
-                        data: performanceData.referrals,
+                        data: referrals,
                         borderColor: '#4CA8DF',
                         backgroundColor: gradient || 'rgba(76, 168, 223, 0.4)',
                         borderWidth: 3,
@@ -63,10 +99,10 @@ const ResultsChart: React.FC = () => {
                 };
             case 'amounts':
                 return {
-                    labels: performanceData.labels,
+                    labels,
                     datasets: [{
                         label: '引薦金額 (萬)',
-                        data: performanceData.amounts.map(v => Math.round(v / 10000)),
+                        data: amounts.map(v => Math.round(v / 10000)),
                         borderColor: '#87CEFA',
                         backgroundColor: gradient || 'rgba(135, 206, 250, 0.4)',
                         borderWidth: 3,
@@ -81,10 +117,10 @@ const ResultsChart: React.FC = () => {
                 };
             case 'guests':
                 return {
-                    labels: performanceData.labels,
+                    labels,
                     datasets: [{
                         label: '來賓人數',
-                        data: performanceData.guests,
+                        data: guests,
                         borderColor: '#6495ED',
                         backgroundColor: gradient || 'rgba(100, 149, 237, 0.4)',
                         borderWidth: 3,
@@ -178,7 +214,13 @@ const ResultsChart: React.FC = () => {
             </div>
 
             <div className="h-[400px] w-full">
-                <Line ref={chartRef} data={getChartData()} options={options} />
+                {isLoading && !rowsRaw ? (
+                    <div className="flex h-full w-full items-center justify-center text-gray-500 text-sm">
+                        載入中…
+                    </div>
+                ) : (
+                    <Line ref={chartRef} data={getChartData()} options={options} />
+                )}
             </div>
         </div>
     );

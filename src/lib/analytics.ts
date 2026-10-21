@@ -31,7 +31,9 @@ export const initAnalytics = () => {
         document.head.appendChild(script);
 
         window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); }
+        window.gtag = function (...args: unknown[]) {
+            window.dataLayer.push(args);
+        };
         window.gtag('js', new Date());
         window.gtag('config', config.gaId);
         console.log(`✅ GA4 Initialized: ${config.gaId}`);
@@ -58,7 +60,7 @@ export const trackEvent = async (eventName: string, details: any = {}) => {
             user_agent: navigator.userAgent,
             path: window.location.pathname
         });
-    } catch (error) {
+    } catch {
         // Silent fail for analytics
     }
 };

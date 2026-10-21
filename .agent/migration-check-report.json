@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-12-11T06:20:14.042Z",
+  "timestamp": "2026-04-22T00:55:25.707Z",
   "summary": {
     "total": 100,
-    "passed": 99,
-    "failed": 1,
+    "passed": 100,
+    "failed": 0,
     "warnings": 0,
-    "passRate": "99.0%"
+    "passRate": "100.0%"
   },
   "results": {
     "passed": [
@@ -22,6 +22,11 @@
       {
         "id": "003",
         "description": "tsconfig.json 存在",
+        "passed": true
+      },
+      {
+        "id": "004",
+        "description": "Tailwind 已設定（Vite 外掛或 postcss）",
         "passed": true
       },
       {
@@ -81,7 +86,7 @@
       },
       {
         "id": "016",
-        "description": "Layout 組件存在",
+        "description": "App.tsx 組合 Navbar / Footer（取代舊 Layout）",
         "passed": true
       },
       {
@@ -241,7 +246,7 @@
       },
       {
         "id": "048",
-        "description": "Home 頁面包含背景圖片",
+        "description": "Hero 使用背景圖（PageHero）",
         "passed": true
       },
       {
@@ -291,7 +296,7 @@
       },
       {
         "id": "058",
-        "description": "index.css 引入 legacy.css",
+        "description": "legacy.css 存在（選用；主樣式為 Tailwind）",
         "passed": true
       },
       {
@@ -311,7 +316,7 @@
       },
       {
         "id": "062",
-        "description": "Layout 包含 StarryBackground",
+        "description": "App 使用 StarryBackground",
         "passed": true
       },
       {
@@ -431,17 +436,17 @@
       },
       {
         "id": "086",
-        "description": "Layout 有 Navbar",
+        "description": "App 有 Navbar",
         "passed": true
       },
       {
         "id": "087",
-        "description": "Layout 有 Footer",
+        "description": "App 有 Footer",
         "passed": true
       },
       {
         "id": "088",
-        "description": "Layout 有 Outlet",
+        "description": "App 有路由 Routes",
         "passed": true
       },
       {
@@ -491,12 +496,12 @@
       },
       {
         "id": "098",
-        "description": "Home 背景有 willChange",
+        "description": "Hero 背景有 willChange（PageHero）",
         "passed": true
       },
       {
         "id": "099",
-        "description": "useMembers 載入 JSON 資料",
+        "description": "會員資料由 Supabase 載入（api/members）",
         "passed": true
       },
       {
@@ -505,13 +510,7 @@
         "passed": true
       }
     ],
-    "failed": [
-      {
-        "id": "004",
-        "description": "tailwind.config.js 或 CSS 配置存在",
-        "passed": false
-      }
-    ],
+    "failed": [],
     "warnings": []
   }
 }

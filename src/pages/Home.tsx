@@ -25,7 +25,8 @@ const Home: React.FC = () => {
             />
             {/* Hero Section */}
             <PageHero
-                title={<>BNI 長輝白金分會<br />台灣頂尖線上商會</>}
+                title="BNI 長輝白金分會"
+                heroTagline="台灣頂尖線上商會"
                 subtitle={
                     <>
                         100% 支援線上與會・不受地點限制<br />

@@ -1,3 +1,6 @@
+export type MemberStatus = 'active' | 'frozen';
+export type MembershipType = 'resigned' | 'credit_hold';
+
 export interface Member {
     id: number;
     name: string;
@@ -17,6 +20,14 @@ export interface Member {
     user_id?: string;
     email?: string;
     phone?: string;
+    is_admin?: boolean;
+    status?: MemberStatus;
+    membership_type?: MembershipType | null;
+    frozen_at?: string | null;
+    /** 金質獎章數：0 無、1 金質、2 雙金質 */
+    gold_medal_count?: number;
+    /** @deprecated 請改用 gold_medal_count；保留相容舊資料 */
+    has_gold_medal?: boolean;
 }
 
 export interface MemberLink {
@@ -38,9 +49,12 @@ export interface Referral {
 }
 
 export interface ReferralPerson {
+    memberId?: string;
     name: string;
     industry: string;
     photo: string;
+    /** 與 members.photoPosition 同步，供頭像 object-position */
+    photoPosition?: string;
     story?: string;
     testimonial?: string;
     value?: string;
