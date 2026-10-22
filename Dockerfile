@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -45,7 +45,7 @@ RUN ls -la dist/ && \
     echo "Build verified successfully!"
 
 # Production stage
-FROM node:20-slim
+FROM node:22-slim
 
 WORKDIR /app
 
